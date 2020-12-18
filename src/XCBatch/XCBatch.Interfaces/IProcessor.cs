@@ -1,12 +1,38 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace XCBatch.Interfaces
 {
-    public interface IProcessor<T> where T : ISource
+    /// <summary>
+    /// use a dequeued source
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public interface IProcessor<out T> where T : class, ISource
     {
-        IState Process(T source);
+        /// <summary>
+        /// Used on a dequeued source
+        /// Given the source type, the processor must know how to retrieve any data to be 
+        /// processed and any dependent data in addition to how it should be handled.
+        /// </summary>
+        /// 
+        /// <remarks>
+        /// <para>The implementation must implicitly share knowledge of what is required to
+        /// process the source.</para>
+        /// 
+        /// <para>This method will be called with several different source objects during
+        /// the life time of the Processor.</para>
+        /// 
+        /// <para>This class should be stateless but can store instance local cache.</para>
+        /// </remarks>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        IProcessResultState Process(ISource source);
+
+        /// <summary>
+        /// name being processed
+        /// </summary>
+        /// 
+        /// <remarks>
+        /// <para>This should not use introspection as it would impact performance.</para>
+        /// </remarks>
+        System.Type SourceType { get; }
     }
 }

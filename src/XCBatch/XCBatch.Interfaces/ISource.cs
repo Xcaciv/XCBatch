@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace XCBatch.Interfaces
 {
@@ -8,47 +6,65 @@ namespace XCBatch.Interfaces
     /// describes a operation/job source
     /// </summary>
     /// <remarks>
-    /// <para>This interface is a purposly turse description of a work source. This source
+    /// <para>This interface is a purposely terse description of a work source. This source
     /// must have a registered processor to be dequeued. Avoid defining a generic processor
     /// as this would cause duplication of functionality.</para>
     /// </remarks>
     public interface ISource
     {
         /// <summary>
-        /// arbitrary identifier generated
+        /// arbitrary identifier for tracking an operation
         /// </summary>
-        /// <remarks>
-        /// <para>Used to track a process through subsiquent queueing of child data to
-        /// be processed to it's entirety.</para>
         /// 
-        /// <para></para>
+        /// <remarks>
+        /// <para>This is not meant to be unique. However it is to be used to track a process 
+        /// through subsequent queuing of child data to be processed to it's entirety.</para>
+        /// 
+        /// <para>For example a file may be queued for parsing. Once Parsed, each entity in 
+        /// the file can then be re-queued to process to the next step. The next step may also
+        /// re-queue its output or other operations. All of these can share the same TransferId.
+        /// The whole series of operations can then be followed when the Id is used in 
+        /// logging.</para>
+        /// 
         /// </remarks>
         Guid TransferId { get; }
+
         /// <summary>
         /// used in distributing shared resources
         /// </summary>
+        /// 
         /// <remarks>
-        /// <para>To be used in dequeue filters.</para>
+        /// <para>To be used in dequeue filters. An ENUM is not used here to prevent unnecessary 
+        /// dependencies.</para>
         /// </remarks>
+        /// 
         /// <example>
-        /// mySource.DistrobutionId = user.CustomerId;
+        /// // assign processors on a per-customer basis
+        /// mySource.DistributionId = user.CustomerId;
         /// </example>
-        int DistrobutionId { get; }
+        int DistributionId { get; }
+
         /// <summary>
-        /// name used for dequeue
+        /// used by queue and processor to determine how to handle resources.
         /// </summary>
+        /// 
         /// <remarks>
-        /// <para>Specific to the implementation. This shal not be used in place of namespace 
-        /// which will be decided by the queue.</para>
+        /// <para>The processor may decide to use more memory or preprocess some part of the
+        /// source to optimize based on the burden score.</para>
+        /// <para>If the processor has the resources it could choose to process many high Burden
+        /// source in parallel or use async calls to allow for long network waits depending on 
+        /// the source type.</para>
         /// </remarks>
-        string Type { get; }
+        int Burden { get; }
+
         /// <summary>
         /// used by Processor to locate job 
         /// </summary>
+        /// 
         /// <remarks>
-        /// <para>Since the processor is intented on being type specific, it is left with
+        /// <para>Since the processor is intended on being type specific, it is left with
         /// the responsibility of knowing what this id means.</para>
         /// </remarks>
-        long SubjectId { get; }
+        long SubjectId { get; } 
     }
 }

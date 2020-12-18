@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
+﻿
 namespace XCBatch.Interfaces
 {
     /// <summary>
@@ -11,7 +8,7 @@ namespace XCBatch.Interfaces
     /// <para>Using a state interface allows for extended states for specific circumstances
     /// or types.</para>
     /// </remarks>
-    public interface IState
+    public interface IProcessResultState
     {
         /// <summary>
         /// unique name of the state
@@ -21,7 +18,7 @@ namespace XCBatch.Interfaces
         /// </remarks>
         string Name { get; }
         /// <summary>
-        /// single word English code used to translate explination of reason for status in UI
+        /// single word English code used to translate explanation of reason for status in UIgit
         /// </summary>
         string ReasonCode { get; }
         /// <summary>
