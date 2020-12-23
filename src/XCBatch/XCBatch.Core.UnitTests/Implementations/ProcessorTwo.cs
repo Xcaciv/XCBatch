@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using XCBatch.Interfaces;
 
-namespace XCBatch.Core.UnitTests.TestImplementations
+namespace XCBatch.Core.UnitTests.Implementations
 {
-    public class ProcessorOne : IProcessor<SourceOne>
+    public class ProcessorTwo : IProcessor<ISource>
     {
-        public Type SourceType => typeof(SourceOne);
+        public Type SourceType => typeof(SourceTwo);
 
         public IProcessResultState ExpectedStatus { get; set; }
 

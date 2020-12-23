@@ -1,10 +1,4 @@
 ﻿using Xunit;
-using XCBatch.Core;
-using System;
-using System.Collections.Generic;
-using XCBatch.Interfaces;
-using XCBatch.Core;
-using XCBatch.Core.UnitTests.TestImplementations;
 
 namespace XCBatch.Core.UnitTests
 {
@@ -16,26 +10,19 @@ namespace XCBatch.Core.UnitTests
             var queueClient = Core.Factory.GetBasicQueueInstance();
             queueClient.EnableDeadLetter = true;
 
-            var aSouce = new SourceOne()
-            {
-                SubjectId = 1
-            };
+            var dispatchedClient = Scenarios.Queue.DispatchOneDeadLetter(queueClient);
 
-            var bSource = new SourceTwo()
-            {
-                SubjectId = 200
-            };
+            Assert.Single(dispatchedClient.DeadLetters);
+        }
 
-            queueClient.Enqueue(aSouce);
-            queueClient.Enqueue(bSource);
+        [Fact()]
+        public void Dispatch_WithDeadLetterDisabled_NoDeadLetter()
+        {
+            var queueClient = Core.Factory.GetBasicQueueInstance();
 
-            IProcessor<ISource> aProcessor = new ProcessorOne();
+            var dispatchedClient = Scenarios.Queue.DispatchOneDeadLetter(queueClient);
 
-            queueClient.RegisterProcessor(aProcessor);
-
-            queueClient.Dispatch();
-
-            Assert.True(queueClient.DeadLetters.Count == 1);
+            Assert.Empty(dispatchedClient.DeadLetters);
         }
     }
 }

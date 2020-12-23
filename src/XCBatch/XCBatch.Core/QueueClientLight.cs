@@ -12,7 +12,7 @@ namespace XCBatch.Core
     /// <para>This implementation </para>
     /// <para>Use this class with IoC Container or use the factory for a memory queue.</para>
     /// </remarks>
-    public class QueueClientLight
+    public class QueueClientLight : IQueueClient
     {
         /// <summary>
         /// queue instance
@@ -28,7 +28,7 @@ namespace XCBatch.Core
         /// indicates that the queue processing has started
         /// </summary>
         protected bool HasDequeueStarted { get => hasDequeueStarted; }
-        
+
         /// <summary>
         /// collection of states that were unsuccessful
         /// </summary>
@@ -117,13 +117,13 @@ namespace XCBatch.Core
                     }
                     else
                     {
-                        
+
                         this.OnUnsuccessful(resultState, source);
                     }
                 }
                 else
                 {
-                    this.OnDeadLetter(source, true);
+                    this.OnDeadLetter(source);
                 }
             }
 
@@ -149,22 +149,17 @@ namespace XCBatch.Core
             var errorState = resultState as ProcessResultState.Error;
             if (errorState != null && errorState.Source == null) errorState.Source = source;
 
-            if (this.EnableDeadLetter) this.Unsuccessful.Add(resultState);
+            this.Unsuccessful.Add(resultState);
         }
 
         /// <summary>
         /// simple dead letter handler
         /// </summary>
-        ///
-        /// <remarks>
-        /// <para>set tmpForce to true during full queue processing and requeued when done</para>
-        /// </remarks>
-        /// 
         /// <param name="source"></param>
         /// <param name="tempForce">allow add temporarily</param>
-        protected virtual void OnDeadLetter(ISource source, bool tempForce)
+        protected virtual void OnDeadLetter(ISource source)
         {
-            DeadLetters.Add(source);
+            if (this.EnableDeadLetter) DeadLetters.Add(source);
         }
 
         /// <summary>
