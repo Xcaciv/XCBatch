@@ -4,35 +4,45 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using XCBatch.Interfaces;
+using XCBatch.Interfaces.Adapters;
 
 namespace XCBatch.Core
 {
     /// <summary>
-    /// parallel queue processing
+    /// parallel queue processing limited by system thread pool settings
     /// </summary>
     public class ParallelQueueFrontend : IQueueFrontend
     {
+        protected ConcurrentDictionary<Type, IProcessor<ISource>> processors = new ConcurrentDictionary<Type, IProcessor<ISource>>();
+
         /// <summary>
         /// enable dead letter capture, overriding event
         /// </summary>
         public bool EnableDeadLetter { get; set; }
+        /// <summary>
+        /// Source without a matching processor at the time of dispatch
+        /// </summary>
+        public IEnumerable<ISource> DeadLetters => deadletters.ToArray();
+        protected ConcurrentBag<ISource> deadletters = new ConcurrentBag<ISource>();
+
+        /// <summary>
+        /// result of processors that were unable to finish or had errors
+        /// </summary>
+        public IEnumerable<IProcessResultState> Unsuccessful => unsuccessful.ToArray();
+        protected ConcurrentBag<IProcessResultState> unsuccessful = new ConcurrentBag<IProcessResultState>();
 
         /// <summary>
         /// enable success capture, overriding event
         /// </summary>
         public bool EnableSaveSuccess { get; set; }
-
-        protected ConcurrentDictionary<Type, IProcessor<ISource>> processors = new ConcurrentDictionary<Type, IProcessor<ISource>>();
-
-        protected ConcurrentBag<ISource> deadletters = new ConcurrentBag<ISource>();
-        public IEnumerable<ISource> DeadLetters => deadletters.ToArray();
-
-        protected ConcurrentBag<IProcessResultState> unsuccessful = new ConcurrentBag<IProcessResultState>();
-        public IEnumerable<IProcessResultState> Unsuccessful => unsuccessful.ToArray();
-
-
-        protected ConcurrentBag<IProcessResultState> successful = new ConcurrentBag<IProcessResultState>();
+        /// <summary>
+        /// list of successful results
+        /// </summary>
+        /// <remarks>
+        /// <para>This is only populated when EnableSaveSuccess is set to true.</para>
+        /// </remarks>
         public IEnumerable<IProcessResultState> Successful => successful.ToArray();
+        protected ConcurrentBag<IProcessResultState> successful = new ConcurrentBag<IProcessResultState>();
 
         protected readonly IQueueBackend backend;
 
@@ -42,10 +52,8 @@ namespace XCBatch.Core
         /// <param name="queue"></param>
         public ParallelQueueFrontend(IQueueBackend queue) => backend = queue;
 
-        // TODO: some async on dequeue?
-
         /// <summary>
-        /// process queue
+        /// process queue in parallel limited by system thread pool settings
         /// </summary>
         public void Dispatch()
         {
@@ -118,6 +126,7 @@ namespace XCBatch.Core
 
         /// <summary>
         /// event triggered when an requeueable result is found
+        /// NOTE: Must be thread safe
         /// </summary>
         public event RequeueableHandler OnRequeueable
         {
@@ -158,6 +167,7 @@ namespace XCBatch.Core
         protected event SuccessfulHandler onSuccessful;
         /// <summary>
         /// event triggered when an un-processable source is dequeued
+        /// NOTE: Must be thread safe
         /// </summary>
         public event SuccessfulHandler OnSuccessful
         {
@@ -201,6 +211,7 @@ namespace XCBatch.Core
         protected event UnsuccessfulHandler onUnsuccessful;
         /// <summary>
         /// event triggered when an un-processable source is dequeued
+        /// NOTE: Must be thread safe
         /// </summary>
         public event UnsuccessfulHandler OnUnsuccessful
         {
@@ -241,6 +252,7 @@ namespace XCBatch.Core
         protected event DeadLetterHandler onDeadletter;
         /// <summary>
         /// event triggered when an un-processable source is dequeued
+        /// NOTE: Must be thread safe
         /// </summary>
         public event DeadLetterHandler OnDeadLetter
         {
@@ -261,6 +273,13 @@ namespace XCBatch.Core
             backend.Enqueue(source);
         }
 
+        /// <summary>
+        /// add list of sources
+        /// </summary>
+        /// <remarks>
+        /// <para>This method is purposely not threaded, leaving the queue adapter to manage threading</para>
+        /// </remarks>
+        /// <param name="source"></param>
         public void EnqueueRange(IEnumerable<ISource> source)
         {
             backend.EnqueueRange(source);

@@ -1,5 +1,6 @@
 ﻿using XCBatch.Core.UnitTests.Implementations;
 using XCBatch.Interfaces;
+using XCBatch.Interfaces.Adapters;
 
 namespace XCBatch.Core.UnitTests.Scenarios
 {
@@ -30,7 +31,7 @@ namespace XCBatch.Core.UnitTests.Scenarios
             return queueClient;
         }
 
-        public static IQueueFrontend DispatchMany(IQueueFrontend queueClient)
+        public static IQueueFrontend DispatchManyLong(IQueueFrontend queueClient)
         {
 
             for (int i = 1; i <= 1000; i++)

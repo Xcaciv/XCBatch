@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using XCBatch.Interfaces;
+using XCBatch.Interfaces.Adapters;
 
 namespace XCBatch.Core
 {
@@ -20,7 +21,7 @@ namespace XCBatch.Core
         protected readonly Dictionary<int, Queue<ISourceBlock<ISource>>> indexedSources = new Dictionary<int, Queue<ISourceBlock<ISource>>>();
 
         /// <summary>
-        /// dequeue next source from next source list
+        /// dequeue next source block from next source list
         /// </summary>
         /// <remarks>
         /// <para>The effect of removing the list from the dictionary and reading it should put it at the end</para>
@@ -34,7 +35,11 @@ namespace XCBatch.Core
             
             return Dequeue(distributionId);
         }
-
+        /// <summary>
+        /// dequeue next source block based on distribution id
+        /// </summary>
+        /// <param name="distributionId"></param>
+        /// <returns></returns>
         public ISourceBlock<ISource> Dequeue(int distributionId)
         {
             return indexedSources[distributionId].Dequeue();

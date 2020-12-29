@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using XCBatch.Interfaces;
+using XCBatch.Interfaces.Adapters;
 
 namespace XCBatch.Core
 {
