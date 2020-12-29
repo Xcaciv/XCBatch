@@ -1,6 +1,4 @@
-﻿
-
-namespace XCBatch.Interfaces
+﻿namespace XCBatch.Interfaces.Adapters
 {
     /// <summary>
     /// back-end that allows for secondary criteria for distribution of tasks

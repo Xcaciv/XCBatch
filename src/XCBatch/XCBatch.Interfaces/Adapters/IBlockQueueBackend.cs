@@ -1,5 +1,4 @@
-﻿
-namespace XCBatch.Interfaces
+﻿namespace XCBatch.Interfaces.Adapters
 {
     /// <summary>
     /// process queue of blocks
