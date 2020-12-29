@@ -1,6 +1,4 @@
-﻿
-
-namespace XCBatch.Core.Exception
+﻿namespace XCBatch.Core.Exceptions
 {
     /// <summary>
     /// Exception thrown when a block contains elements that do not belong

@@ -2,14 +2,14 @@
 {
     public static class Factory
     {
-        public static QueueClientLight GetBasicQueueInstance()
+        public static QueueFrontend GetBasicQueueInstance()
         {
-            return new QueueClientLight(new MemoryQueue());
+            return new QueueFrontend(new MemoryQueue());
         }
 
-        public static QueueClientLight GetConcurrentQueueInstance()
+        public static ParallelQueueFrontend GetParallelQueueInstance()
         {
-            return new QueueClientLight(new ConcurrentMemoryQueue());
+            return new ParallelQueueFrontend(new ConcurrentMemoryQueue());
         }
     }
 }

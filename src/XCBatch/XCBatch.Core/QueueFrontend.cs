@@ -9,10 +9,10 @@ namespace XCBatch.Core
     /// </summary>
     /// 
     /// <remarks>
-    /// <para>This implementation </para>
+    /// <para>CAUTION: NOT THREAD SAFE</para>
     /// <para>Use this class with IoC Container or use the factory for a memory queue.</para>
     /// </remarks>
-    public class QueueClientLight : IQueueClient
+    public class QueueFrontend : IQueueFrontend
     {
         /// <summary>
         /// queue instance
@@ -29,20 +29,26 @@ namespace XCBatch.Core
         /// </summary>
         protected bool HasDequeueStarted { get => hasDequeueStarted; }
 
+        protected List<IProcessResultState> unsuccessful = new List<IProcessResultState>();
+
         /// <summary>
         /// collection of states that were unsuccessful
         /// </summary>
-        public List<IProcessResultState> Unsuccessful { get; private set; } = new List<IProcessResultState>();
+        public IEnumerable<IProcessResultState> Unsuccessful {
+            get => unsuccessful;
+        } 
 
         /// <summary>
         /// specify if a source that does not have a processor should be put in the dead letter queue
         /// </summary>
         public bool EnableDeadLetter { get; set; } = false;
 
+        protected List<ISource> deadletters = new List<ISource>();
+
         /// <summary>
         /// list of source that did not have a processor during dispatch
         /// </summary>
-        public List<ISource> DeadLetters { get; private set; } = new List<ISource>();
+        public IEnumerable<ISource> DeadLetters { get => deadletters; } 
 
         /// <summary>
         /// determines if the queue has had an item removed
@@ -53,16 +59,16 @@ namespace XCBatch.Core
         /// constructor requiring a back-end
         /// </summary>
         /// <param name="queue"></param>
-        public QueueClientLight(IQueueBackend queue) => backend = queue;
+        public QueueFrontend(IQueueBackend queue) => this.backend = queue;
 
         /// <summary>
         /// add item to back-end
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        public int Enqueue(ISource source)
+        public void Enqueue(ISource source)
         {
-            return backend.Enqueue(source);
+            this.backend.Enqueue(source);
         }
 
         /// <summary>
@@ -70,50 +76,45 @@ namespace XCBatch.Core
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        public int Enqueue(IEnumerable<ISource> source)
+        public void EnqueueRange(IEnumerable<ISource> source)
         {
-            return backend.Enqueue(source);
-        }
-
-        /// <summary>
-        /// process the queue adding the given list of processor instances to the registry
-        /// </summary>
-        /// <param name="processors"></param>
-        /// <returns>number of sources processed</returns>
-        public int Dispatch(IList<IProcessor<ISource>> processors)
-        {
-            foreach (var processor in processors)
-            {
-                this.RegisterProcessor(processor);
-            }
-
-            return this.Dispatch();
+            this.backend.EnqueueRange(source);
         }
 
         /// <summary>
         /// process the queue with registered processor instances
         /// </summary>
         /// <returns>number successfully processed</returns>
-        public int Dispatch()
+        public void Dispatch()
         {
             ISource source;
-            var successCount = 0;
-            while ((source = backend.Dequeue()) != null)
+            while ((source = this.backend.Dequeue()) != null)
+            {
+                Dispatch(source);
+            }
+        }
+
+        /// <summary>
+        /// use the registered processor on a source
+        /// </summary>
+        /// <param name="source"></param>
+        public void Dispatch(ISource source)
+        {
+            try
             {
                 var sourceType = source.GetType();
                 if (processors.ContainsKey(sourceType))
                 {
                     var resultState = processors[sourceType].Process(source);
-                    if (resultState is IStateRequeueable)
-                    {
-                        var requeueable = resultState as IStateRequeueable;
-                        this.Enqueue(requeueable.GetQueueableResults());
-                    }
 
                     if (resultState is ProcessResultState.Success)
                     {
+                        if (resultState is IProcessResultRequeueable)
+                        {
+                            OnRequeueable(resultState);
+                        }
                         this.OnSuccess(resultState, source);
-                        successCount++;
+                        
                     }
                     else
                     {
@@ -126,8 +127,20 @@ namespace XCBatch.Core
                     this.OnDeadLetter(source);
                 }
             }
+            catch (Exception ex)
+            {
+                this.OnUnsuccessful(new ProcessResultState.Error("Exception while processing source.") { Ex = ex }, source);
+            }
+        }
 
-            return successCount;
+        /// <summary>
+        /// handle re-queue
+        /// </summary>
+        /// <param name="resultState"></param>
+        protected void OnRequeueable(IProcessResultState resultState)
+        {
+            var requeueable = resultState as IProcessResultRequeueable;
+            this.EnqueueRange(requeueable.GetQueueableResults());
         }
 
         /// <summary>
@@ -136,7 +149,7 @@ namespace XCBatch.Core
         /// <param name="resultState"></param>
         protected virtual void OnSuccess(IProcessResultState resultState, ISource source)
         {
-            // do nothing
+            // do nothing, just enjoy it
         }
 
         /// <summary>
@@ -149,7 +162,7 @@ namespace XCBatch.Core
             var errorState = resultState as ProcessResultState.Error;
             if (errorState != null && errorState.Source == null) errorState.Source = source;
 
-            this.Unsuccessful.Add(resultState);
+            this.unsuccessful.Add(resultState);
         }
 
         /// <summary>
@@ -159,7 +172,7 @@ namespace XCBatch.Core
         /// <param name="tempForce">allow add temporarily</param>
         protected virtual void OnDeadLetter(ISource source)
         {
-            if (this.EnableDeadLetter) DeadLetters.Add(source);
+            if (this.EnableDeadLetter) deadletters.Add(source);
         }
 
         /// <summary>

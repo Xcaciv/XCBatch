@@ -27,7 +27,7 @@ namespace XCBatch.Interfaces
         IProcessResultState Process(ISource source);
 
         /// <summary>
-        /// name being processed
+        /// target type to be processed
         /// </summary>
         /// 
         /// <remarks>

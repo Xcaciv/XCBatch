@@ -25,15 +25,14 @@ namespace XCBatch.Core
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        public int Enqueue(ISourceBlock<ISource> sourceBlock)
+        public void Enqueue(ISourceBlock<ISource> sourceBlock)
         {
             if (!CheckBlockSourceAreValid(sourceBlock))
             {
-                throw new Exception.BlockValidationException("Source Block contains inconsistent source types in it's collection.");
+                throw new Exceptions.BlockValidationException("Source Block contains inconsistent source types in it's collection.");
             }
 
             blockSourceQueue.Enqueue(sourceBlock);
-            return Count;
         }
 
         /// <summary>
@@ -41,10 +40,10 @@ namespace XCBatch.Core
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        public int Enqueue(IEnumerable<ISource> source)
+        public void EnqueueRange(IEnumerable<ISource> source)
         {
             var block = new Source.SourceBlock<ISource>(source);
-            return this.Enqueue((ISourceBlock<ISource>)block);
+            this.Enqueue((ISourceBlock<ISource>)block);
         }
 
         /// <summary>

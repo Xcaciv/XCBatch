@@ -15,7 +15,7 @@ namespace XCBatch.Interfaces
         /// </summary>
         /// <param name="source"></param>
         /// <returns>queue count</returns>
-        int Enqueue(ISourceBlock<ISource> sourceBlock);
+        void Enqueue(ISourceBlock<ISource> sourceBlock);
         /// <summary>
         /// remove and return the next block from the queue
         /// </summary>

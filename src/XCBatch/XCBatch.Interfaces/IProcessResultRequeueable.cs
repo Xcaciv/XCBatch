@@ -5,7 +5,7 @@ namespace XCBatch.Interfaces
     /// <summary>
     /// returned by a processor that has results to be queued
     /// </summary>
-    public interface IStateRequeueable : IProcessResultState
+    public interface IProcessResultRequeueable : IProcessResultState
     {
         /// <summary>
         /// result to be re-queued for processing

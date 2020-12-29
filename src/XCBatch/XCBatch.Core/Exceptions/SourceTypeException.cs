@@ -1,6 +1,4 @@
-﻿
-
-namespace XCBatch.Core.Exception
+﻿namespace XCBatch.Core.Exceptions
 {
     /// <summary>
     /// Exception thrown when a the given source type does not match the current context

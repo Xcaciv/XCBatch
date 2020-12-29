@@ -6,7 +6,7 @@ namespace XCBatch.Core.ProcessResultState
     /// <summary>
     /// status that specifies the processor has output that needs to be processed further
     /// </summary>
-    public class Requeueable : Success, IStateRequeueable
+    public class Requeueable : Success, IProcessResultRequeueable
     {
         private readonly IEnumerable<ISource> _sourceToQueue;
 

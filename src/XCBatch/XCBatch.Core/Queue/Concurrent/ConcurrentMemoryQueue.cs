@@ -14,9 +14,9 @@ namespace XCBatch.Core
     public class ConcurrentMemoryQueue : IQueueBackend
     {
         /// <summary>
-        /// current queue quantity
+        /// current queue status
         /// </summary>
-        public int Count => sourceQueue.Count;
+        public bool IsEmpty => sourceQueue.IsEmpty;
 
         /// <summary>
         /// list used as queue to provide random access
@@ -38,26 +38,23 @@ namespace XCBatch.Core
         /// add source to the FIFO queue
         /// </summary>
         /// <param name="source"></param>
-        /// <returns></returns>
-        public int Enqueue(ISource source)
+        /// <returns>void for performance reasons</returns>
+        public void Enqueue(ISource source)
         {
             sourceQueue.Enqueue(source);
-            return sourceQueue.Count;
         }
 
         /// <summary>
         /// add source collection to FIFO queue
         /// </summary>
         /// <param name="source"></param>
-        /// <returns></returns>
-        public int Enqueue(IEnumerable<ISource> sources)
+        /// <returns>void for performance reasons</returns>
+        public void EnqueueRange(IEnumerable<ISource> sources)
         {
             foreach (var item in sources)
             {
                 sourceQueue.Enqueue(item);
             }
-
-            return sourceQueue.Count;
         }
 
         /// <summary>

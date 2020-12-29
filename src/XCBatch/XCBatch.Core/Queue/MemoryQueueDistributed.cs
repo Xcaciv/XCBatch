@@ -12,7 +12,7 @@ namespace XCBatch.Core
         /// <summary>
         /// current queue quantity
         /// </summary>
-        public int Count => indexedSources.Select(o => o.Value.Count).Sum();
+        public bool IsEmpty => !indexedSources.Any(o => o.Value.Count > 0);
 
         /// <summary>
         /// sources indexed distribution id then by type
@@ -45,11 +45,11 @@ namespace XCBatch.Core
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        public int Enqueue(ISource source)
+        public void Enqueue(ISource source)
         {
             var queue = this.InitializeStorage(source.DistributionId);
             queue.Enqueue(source);
-            return this.Count;
+            
         }
 
         /// <summary>
@@ -57,14 +57,13 @@ namespace XCBatch.Core
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        public int Enqueue(IEnumerable<ISource> sources)
+        public void EnqueueRange(IEnumerable<ISource> sources)
         {
             foreach(var source in sources)
             {
                 Enqueue(source);
             }
 
-            return this.Count;
         }
 
         /// <summary>

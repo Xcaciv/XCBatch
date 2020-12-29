@@ -9,9 +9,9 @@ namespace XCBatch.Core
     public class MemoryQueue : IQueueBackend
     {
         /// <summary>
-        /// current queue quantity
+        /// current queue state
         /// </summary>
-        public int Count => sourceQueue.Count;
+        public bool IsEmpty => sourceQueue.Count == 0;
 
         /// <summary>
         /// list used as queue to provide random access
@@ -34,10 +34,9 @@ namespace XCBatch.Core
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        public int Enqueue(ISource source)
+        public void Enqueue(ISource source)
         {
             sourceQueue.Enqueue(source);
-            return sourceQueue.Count;
         }
 
         /// <summary>
@@ -45,14 +44,12 @@ namespace XCBatch.Core
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        public int Enqueue(IEnumerable<ISource> sources)
+        public void EnqueueRange(IEnumerable<ISource> sources)
         {
             foreach(var item in sources)
             {
                 sourceQueue.Enqueue(item);
             }
-
-            return sourceQueue.Count;
         }
 
         /// <summary>
