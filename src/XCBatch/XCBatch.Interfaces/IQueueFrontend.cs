@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace XCBatch.Interfaces.Adapters
+namespace XCBatch.Interfaces
 {
     /// <summary>
     /// minimum queue and dispatch facade
