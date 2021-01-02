@@ -2,11 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using XCBatch.Core.Exceptions;
+using XCBatch.Core.Source;
 using XCBatch.Interfaces;
 using XCBatch.Interfaces.Adapters;
 
 namespace XCBatch.Core.Queue.Concurrent
 {
+    /// <summary>
+    /// block queue implementation that requires consistent typed blocks
+    /// </summary>
     public class ConcurrentMemoryBlockQueue : IBlockQueueBackend
     {
         /// <summary>
@@ -35,13 +39,13 @@ namespace XCBatch.Core.Queue.Concurrent
         }
 
         /// <summary>
-        /// Add a queue block
+        /// Add a generic source block from an IEnumerable
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
         public void Enqueue(IEnumerable<ISource> source)
         {
-
+            this.Enqueue((ISourceBlock<ISource>)new SourceBlock<ISource>(source));
         }
 
         /// <summary>

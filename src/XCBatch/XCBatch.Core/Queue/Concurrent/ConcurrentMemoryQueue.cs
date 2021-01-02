@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using XCBatch.Interfaces;
 using XCBatch.Interfaces.Adapters;
 
@@ -52,10 +53,9 @@ namespace XCBatch.Core
         /// <returns>void for performance reasons</returns>
         public void EnqueueRange(IEnumerable<ISource> sources)
         {
-            foreach (var item in sources)
-            {
+            Parallel.ForEach(sources, (item) => {
                 sourceQueue.Enqueue(item);
-            }
+            });
         }
 
         /// <summary>
