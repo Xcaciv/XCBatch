@@ -13,7 +13,7 @@ namespace XCBatch.Core.UnitTests.Implementations
 
         public IProcessResultState Process(ISource source)
         {
-            Task.Delay(1000);
+            Task.Delay((new Random()).Next(188));
             return new ThreadSuccessStatus("test") 
             { 
                 ThreadId = System.Threading.Thread.CurrentThread.ManagedThreadId
