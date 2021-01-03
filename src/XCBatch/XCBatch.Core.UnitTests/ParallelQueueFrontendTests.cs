@@ -1,8 +1,4 @@
 ﻿using Xunit;
-using XCBatch.Core;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Linq;
 
 namespace XCBatch.Core.UnitTests

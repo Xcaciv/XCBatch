@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace XCBatch.Interfaces
+﻿namespace XCBatch.Interfaces
 {
     /// <summary>
     /// extension to frontend that allows to signal the end of the queue for use in treading
+    /// NOTE: implementations *must* be thread safe
     /// </summary>
     public interface IQueueFrontendSignaled : IQueueFrontend
     {

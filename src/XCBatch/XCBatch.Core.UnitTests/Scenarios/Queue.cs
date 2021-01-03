@@ -1,6 +1,5 @@
 ﻿using XCBatch.Core.UnitTests.Implementations;
 using XCBatch.Interfaces;
-using XCBatch.Interfaces.Adapters;
 
 namespace XCBatch.Core.UnitTests.Scenarios
 {

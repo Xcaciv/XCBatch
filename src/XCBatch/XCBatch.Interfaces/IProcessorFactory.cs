@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace XCBatch.Interfaces
+﻿namespace XCBatch.Interfaces
 {
     public interface IProcessorFactory<out T> where T : class, IProcessor<ISource>
     {

@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace XCBatch.Interfaces.Adapters
+﻿namespace XCBatch.Interfaces.Adapters
 {
     /// <summary>
     /// interface to a queue that can be signaled as complete
+    /// NOTE: implementations *must* be thread safe
     /// </summary>
     public interface IQueueBackendSignaled : IQueueBackendDistributed
     {
