@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using XCBatch.Interfaces;
@@ -16,7 +17,7 @@ namespace XCBatch.Core.Source
         /// </summary>
         protected ConcurrentQueue<T> internalList = new ConcurrentQueue<T>();
 
-        public System.Type SourceType{ get => typeof(T); }
+        public System.Type SourceType { get => typeof(T); }
 
         /// <summary>
         /// construct empty collection
@@ -47,6 +48,12 @@ namespace XCBatch.Core.Source
 
         public int DistributionId { get; set; } = -1;
 
+        public Guid TransferId { get; set; } = Guid.Empty;
+
+        public int Burden { get; set; } = -1;
+
+        public long SubjectId { get; set; } = -1;
+
         /// <summary>
         /// append source to the bock
         /// </summary>
@@ -54,6 +61,7 @@ namespace XCBatch.Core.Source
         public void Add(T item)
         {
             internalList.Enqueue(item);
+            if (DistributionId == -1) DistributionId = item.DistributionId;
         }
 
         /// <summary>

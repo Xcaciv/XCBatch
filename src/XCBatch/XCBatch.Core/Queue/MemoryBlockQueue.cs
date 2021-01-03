@@ -19,7 +19,7 @@ namespace XCBatch.Core
         /// <summary>
         /// current number of source blocks
         /// </summary>
-        public int Count => blockSourceQueue.Count;
+        public bool IsEmpty => blockSourceQueue.Count == 0;
 
         /// <summary>
         /// add a source block to the queue 

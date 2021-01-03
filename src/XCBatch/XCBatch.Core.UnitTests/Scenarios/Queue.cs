@@ -31,7 +31,7 @@ namespace XCBatch.Core.UnitTests.Scenarios
             return queueClient;
         }
 
-        public static IQueueFrontend DispatchManyLong(IQueueFrontend queueClient)
+        public static IQueueFrontend DispatchManyLong(IQueueFrontendSignaled queueClient)
         {
 
             for (int i = 1; i <= 1000; i++)
@@ -41,6 +41,8 @@ namespace XCBatch.Core.UnitTests.Scenarios
                     SubjectId = i
                 });
             }
+
+            queueClient.CompleteEnqueue();
 
             IProcessor<ISource> aProcessor = new ParallelProcessor();
 

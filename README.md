@@ -24,7 +24,7 @@ Queue some and Do some
     // do it
     myQueue.Dispatch();
 
-In this example, you need to create MyProcessor to specify what to do with the source. In this case the source is a series of integers. Specify how to handle a type of source:
+In this example, you need to create MyProcessor to specify what to do with the source. In this example the source is a series of integers. The most efficient implementation woud use integers representing object ids or database row ids. Once you define the data queued you need to specify how to handle that type of source:
 
     // Implement processor class
     public class MyProcessor

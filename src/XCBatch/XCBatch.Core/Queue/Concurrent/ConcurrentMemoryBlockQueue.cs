@@ -11,17 +11,49 @@ namespace XCBatch.Core.Queue.Concurrent
     /// <summary>
     /// block queue implementation that requires consistent typed blocks
     /// </summary>
-    public class ConcurrentMemoryBlockQueue : IBlockQueueBackend
+    public class ConcurrentMemoryBlockQueue : IBlockQueueBackendSignaled
     {
         /// <summary>
-        /// current queue quantity
+        /// seconds to allow for read or write to the queue
         /// </summary>
-        public int Count => blockSourceQueue.Count;
+        private readonly int timeout;
 
         /// <summary>
-        /// list used as queue to provide random access
+        /// queue clusters for distribution
         /// </summary>
-        protected readonly ConcurrentQueue<ISourceBlock<ISource>> blockSourceQueue = new ConcurrentQueue<ISourceBlock<ISource>>();
+        protected ConcurrentDictionary<int, BlockingCollection<ISourceBlock<ISource>>[]> blockSourceQueue;
+
+        /// <summary>
+        /// current queue status
+        /// </summary>
+        public bool IsEmpty => blockSourceQueue.IsEmpty;
+
+        /// <summary>
+        /// constructor allowing for altering of default queue cluster size and timeout
+        /// </summary>
+        /// <param name="queueClusterSize"></param>
+        /// <param name="timeoutSeconds"></param>
+        public ConcurrentMemoryBlockQueue(int queueClusterSize = 3, int timeoutSeconds = 1)
+        {
+            timeout = timeoutSeconds;
+            blockSourceQueue[-1] = BuildCollectionNodes(queueClusterSize);
+        }
+
+        /// <summary>
+        /// create a blocking collection array
+        /// </summary>
+        /// <param name="collectionNodeCount"></param>
+        /// <returns></returns>
+        public static BlockingCollection<ISourceBlock<ISource>>[] BuildCollectionNodes(int collectionNodeCount)
+        {
+            var nodes = new List<BlockingCollection<ISourceBlock<ISource>>>();
+            for (int i = 0; i < collectionNodeCount; i++)
+            {
+                nodes.Add(new BlockingCollection<ISourceBlock<ISource>>());
+            }
+
+            return nodes.ToArray();
+        }
 
         /// <summary>
         /// add a source block to the queue 
@@ -35,7 +67,7 @@ namespace XCBatch.Core.Queue.Concurrent
                 throw new BlockValidationException("Source Block contains inconsistent source types in it's collection.");
             }
 
-            blockSourceQueue.Enqueue(sourceBlock);
+            BlockingCollection<ISourceBlock<ISource>>.TryAddToAny(blockSourceQueue[sourceBlock.DistributionId], sourceBlock, System.TimeSpan.FromSeconds(timeout));
         }
 
         /// <summary>
@@ -49,13 +81,39 @@ namespace XCBatch.Core.Queue.Concurrent
         }
 
         /// <summary>
+        /// signal no more queuing and allow for dispatch to finish
+        /// </summary>
+        public void CompleteEnqueue()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        /// <summary>
+        /// signal no more queuing and allow for dispatch to finish
+        /// </summary>
+        public void CompleteEnqueue(int distributionId)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        /// <summary>
         /// retrieve the first source block
         /// </summary>
         /// <returns></returns>
         public ISourceBlock<ISource> Dequeue()
         {
+            return Dequeue(-1);
+        }
+
+        /// <summary>
+        /// retrieve the first source block
+        /// </summary>
+        /// <returns></returns>
+        public ISourceBlock<ISource> Dequeue(int distributionId = -1)
+        {
             ISourceBlock<ISource> block;
-            return (blockSourceQueue.TryDequeue(out block)) ? block : null;
+            BlockingCollection<ISourceBlock<ISource>>.TryTakeFromAny(blockSourceQueue[distributionId], out block, System.TimeSpan.FromSeconds(timeout));
+            return block;
         }
         /// <summary>
         /// Because a block should be able to be handled by a single processor they must

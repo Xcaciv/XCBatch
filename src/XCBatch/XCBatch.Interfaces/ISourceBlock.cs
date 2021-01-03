@@ -6,7 +6,7 @@ namespace XCBatch.Interfaces
     /// describes a block of similar sources to be queued in a batch queue
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public interface ISourceBlock<out T> where T : ISource
+    public interface ISourceBlock<out T> : ISource where T : ISource
     {
         /// <summary>
         /// collection of similar source
@@ -29,7 +29,7 @@ namespace XCBatch.Interfaces
         /// // assign processors on a per-customer basis
         /// mySourceBlock.DistributionId = user.CustomerId;
         /// </example>
-        int DistributionId { get; }
+        new int DistributionId { get; }
 
         /// <summary>
         /// name used for dequeue

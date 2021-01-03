@@ -9,7 +9,7 @@
 
         public static ParallelQueueFrontend GetParallelQueueInstance()
         {
-            return new ParallelQueueFrontend(new ConcurrentMemoryQueue());
+            return new ParallelQueueFrontend(new Queue.Concurrent.ConcurrentMemoryQueue());
         }
     }
 }

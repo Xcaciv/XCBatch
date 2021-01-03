@@ -10,8 +10,4 @@
     <None Remove="Adapter\**" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Adapters\" />
-  </ItemGroup>
-
 </Project>

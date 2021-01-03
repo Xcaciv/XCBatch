@@ -11,7 +11,7 @@ namespace XCBatch.Core
     /// <summary>
     /// parallel queue processing limited by system thread pool settings
     /// </summary>
-    public class ParallelQueueFrontend : IQueueFrontend
+    public class ParallelQueueFrontend : IQueueFrontendSignaled
     {
         protected ConcurrentDictionary<Type, IProcessor<ISource>> processors = new ConcurrentDictionary<Type, IProcessor<ISource>>();
 
@@ -44,13 +44,13 @@ namespace XCBatch.Core
         public IEnumerable<IProcessResultState> Successful => successful.ToArray();
         protected ConcurrentBag<IProcessResultState> successful = new ConcurrentBag<IProcessResultState>();
 
-        protected readonly IQueueBackend backend;
+        protected readonly IQueueBackendSignaled backend;
 
         /// <summary>
         /// constructor requiring a thread safe back-end
         /// </summary>
         /// <param name="queue"></param>
-        public ParallelQueueFrontend(IQueueBackend queue) => backend = queue;
+        public ParallelQueueFrontend(IQueueBackendSignaled queue) => backend = queue;
 
         /// <summary>
         /// process queue in parallel limited by system thread pool settings
@@ -266,8 +266,6 @@ namespace XCBatch.Core
             remove { this.onDeadletter -= value; }
         }
 
-        // TODO: some async on enqueue?
-
         public void Enqueue(ISource source)
         {
             backend.Enqueue(source);
@@ -283,6 +281,23 @@ namespace XCBatch.Core
         public void EnqueueRange(IEnumerable<ISource> source)
         {
             backend.EnqueueRange(source);
+        }
+
+        /// <summary>
+        /// signals the queue is not accepting any more additions
+        /// </summary>
+        public void CompleteEnqueue()
+        {
+            backend.CompleteEnqueue();
+        }
+
+
+        /// <summary>
+        /// signals a distribution is not accepting any more additions
+        /// </summary>
+        public void CompleteEnqueue(int distributionId)
+        {
+            backend.CompleteEnqueue(distributionId);
         }
 
         /// <summary>

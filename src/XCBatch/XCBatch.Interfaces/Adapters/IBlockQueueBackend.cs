@@ -8,7 +8,7 @@
         /// <summary>
         /// number of source items in the queue
         /// </summary>
-        int Count { get; }
+        bool IsEmpty { get; }
         /// <summary>
         /// add a source block to the queue
         /// </summary>

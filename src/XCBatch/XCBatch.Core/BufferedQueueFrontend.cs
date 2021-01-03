@@ -2,9 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using XCBatch.Interfaces;
 using XCBatch.Interfaces.Adapters;
 
@@ -31,20 +29,16 @@ namespace XCBatch.Core
         /// <summary>
         /// construct fronted with a fast bufferQueue and a slower queue
         /// </summary>
-        /// <param name="backendQueue">thread safe queue adaptor</param>
+        /// <param name="backendQueue">thread safe queue adapter</param>
         /// <param name="maxEnqueue"></param>
         /// <param name="timeoutSeconds"></param>
         /// <param name="collectionNodes"></param>
-        public BufferedQueueFrontend(IQueueBackend backendQueue, int timeoutSeconds = 1, int collectionNodes = 3) : base(backendQueue)
+        public BufferedQueueFrontend(IQueueBackendSignaled backendQueue, int timeoutSeconds = 1, int collectionNodes = 3) : base(backendQueue)
         {
-            var nodes = new List<BlockingCollection<ISource>>();
-            for (int i = 0; i < collectionNodes; i++)
-            {
-                nodes.Add(new BlockingCollection<ISource>());
-            }
-            bufferQueue = nodes.ToArray();
+            bufferQueue = Queue.Concurrent.ConcurrentMemoryQueue.BuildCollectionNodes(collectionNodes);
             timeout = timeoutSeconds;
         }
+
 
         public void Flush(int timeoutSeconds)
         {

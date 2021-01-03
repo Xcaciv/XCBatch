@@ -10,6 +10,6 @@
         /// </summary>
         /// <param name="distributionId"></param>
         /// <returns></returns>
-        ISourceBlock<ISource> Dequeue(int distributionId);
+        ISourceBlock<ISource> Dequeue(int distributionId = -1);
     }
 }
