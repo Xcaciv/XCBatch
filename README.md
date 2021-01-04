@@ -108,7 +108,8 @@ Also, consider an advanced scenario where in you need to process large files and
 
 ### TODO
 
-- buffered queue
+- add IDisposable to IQueueBackend and IQueueFrontend
+- Implement Processor factory
 - WCF distributed queue client
 - Azure Storage Queue
 - Azure Message Queue
