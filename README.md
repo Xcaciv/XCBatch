@@ -90,6 +90,8 @@ In the example we use Tasks instead of manual threads since they are more portab
 
 Horizontal scale is core to the cloud value proposition. Horizontal scale not only increases overall throughput but can also be used for higher fault tolerance through redundancy. If you are doing large batch processing you are probably looking to scale horizontally if you are not already doing it. Batch 90 is here to ease you transition and open up additional backend possibilities.
 
+// TODO: explain discrete producer/consumer workers
+
 ## Change to an Azure Service Bus
 
 // TODO: Code example
@@ -104,7 +106,7 @@ Also, consider an advanced scenario where in you need to process large files and
 
 // TODO: Code example
 
-> **note:** Generally speaking a queue is not meant to store data, it is meant to ensure the processing of data.  Therefore, Batch 90 queues source information (that is what information to process) and not data. Creating any sort of complex source objects is strongly discouraged as it will degrade this frameworks performance and efficiency.
+> **note:** Generally speaking a queue is not meant to store data, it is meant to ensure the processing of data.  Therefore, Batch 90 queues source information and not objects. Creating any sort of complex source objects is strongly discouraged as it will degrade this frameworks performance and efficiency.
 
 ### TODO
 
