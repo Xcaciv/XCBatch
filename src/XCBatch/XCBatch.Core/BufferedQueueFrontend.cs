@@ -20,7 +20,7 @@ namespace XCBatch.Core
         /// <summary>
         /// fast thread safe queue
         /// </summary>
-        protected BlockingCollection<ISource>[] bufferQueue;
+        protected IQueueBackendSignaled bufferQueue;
 
         /// <summary>
         /// tasks for moving source to backend queue
@@ -36,18 +36,19 @@ namespace XCBatch.Core
         /// construct fronted with a fast bufferQueue and a slower queue
         /// </summary>
         /// <param name="backendQueue">thread safe queue adapter</param>
-        /// <param name="maxEnqueue"></param>
         /// <param name="timeoutSeconds"></param>
-        /// <param name="collectionNodes"></param>
-        public BufferedQueueFrontend(IQueueBackendSignaled backendQueue, int timeoutSeconds = 1, int collectionNodes = 3, int flushJobs = 2) : base(backendQueue)
+        /// <param name="bufferNodes"></param>
+        /// <param name="flushJobs"></param>
+        public BufferedQueueFrontend(IQueueBackendSignaled backendQueue, int timeoutSeconds = 1, int bufferNodes = 3, int flushJobs = 2, IQueueBackendSignaled buffer = null) : base(backendQueue)
         {
-            bufferQueue = Queue.Concurrent.ConcurrentMemoryQueue.BuildCollectionNodes(collectionNodes);
+            bufferQueue = buffer ?? new Queue.Concurrent.ConcurrentMemoryQueue(bufferNodes, timeoutSeconds);
+
             timeout = timeoutSeconds;
 
             for (int i = 0; i < flushJobs; i++)
             {
                 var t = timeoutSeconds;
-                flushThreads.Add(Task.Factory.StartNew(() => Flush(t)));
+                flushThreads.Add(Task.Factory.StartNew(() => Flush()));
             }
              
         }
@@ -56,12 +57,11 @@ namespace XCBatch.Core
         /// pass buffered source to backend
         /// </summary>
         /// <param name="timeoutSeconds"></param>
-        protected void Flush(int timeoutSeconds)
+        protected void Flush()
         {
-            while (!bufferQueue.All(o => o.IsCompleted))
+            while (!bufferQueue.IsEmpty)
             {
-                ISource source;
-                BlockingCollection<ISource>.TryTakeFromAny(bufferQueue, out source, TimeSpan.FromSeconds(timeoutSeconds));
+                ISource source = bufferQueue.Dequeue();
                 base.backend.Enqueue(source);
             }
 
@@ -69,12 +69,12 @@ namespace XCBatch.Core
         }
 
         /// <summary>
-        /// buffer the source to be passed to backend
+        /// buffer the source to be passed to backend   Alton
         /// </summary>
         /// <param name="source"></param>
         new public void Enqueue(ISource source)
         {
-            BlockingCollection<ISource>.TryAddToAny(bufferQueue, source, timeout);
+            bufferQueue.Enqueue(source);
         }
 
         /// <summary>
@@ -85,7 +85,7 @@ namespace XCBatch.Core
         {
             foreach(var source in sources)
             {
-                BlockingCollection<ISource>.TryAddToAny(bufferQueue, source, timeout);
+                bufferQueue.Enqueue(source);
             }
         }
 
@@ -94,10 +94,17 @@ namespace XCBatch.Core
         /// </summary>
         new public void CompleteEnqueue()
         {
-            foreach(var collection in bufferQueue)
-            {
-                collection.CompleteAdding();
-            }
+            bufferQueue.CompleteEnqueue();
+        }
+
+        /// <summary>
+        /// make sure the buffer gets disposed too
+        /// </summary>
+        /// <param name="disposing"></param>
+        protected override void Dispose(bool disposing)
+        {
+            bufferQueue.Dispose();
+            base.Dispose(disposing);
         }
     }
 }

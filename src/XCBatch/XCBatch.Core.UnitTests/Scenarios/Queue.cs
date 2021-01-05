@@ -5,7 +5,7 @@ namespace XCBatch.Core.UnitTests.Scenarios
 {
     internal static class Queue
     {
-        public static IQueueFrontend DispatchOneDeadLetter(IQueueFrontend queueClient)
+        public static IQueueFrontend EnqueueOneDeadLetter(IQueueFrontend queueClient)
         {
 
             var aSouce = new SourceOne()
@@ -25,15 +25,13 @@ namespace XCBatch.Core.UnitTests.Scenarios
 
             queueClient.RegisterProcessor(aProcessor);
 
-            queueClient.Dispatch();
-
             return queueClient;
         }
 
-        public static IQueueFrontend DispatchManyLong(IQueueFrontendSignaled queueClient)
+        public static IQueueFrontend EnqueueMany(IQueueFrontend queueClient, int queueLength = 1000)
         {
 
-            for (int i = 1; i <= 1000; i++)
+            for (int i = 1; i <= queueLength; i++)
             {
                 queueClient.Enqueue(new SourceOne()
                 {
@@ -41,13 +39,9 @@ namespace XCBatch.Core.UnitTests.Scenarios
                 });
             }
 
-            queueClient.CompleteEnqueue();
-
             IProcessor<ISource> aProcessor = new ParallelProcessor();
 
             queueClient.RegisterProcessor(aProcessor);
-
-            queueClient.Dispatch();
 
             return queueClient;
         }

@@ -122,8 +122,6 @@ namespace XCBatch.Core.Queue.Concurrent
         /// </summary>
         protected bool disposed = false;
 
-        ~ConcurrentMemoryQueue() => Dispose(false);
-
         /// <summary>
         /// cleaning up
         /// </summary>

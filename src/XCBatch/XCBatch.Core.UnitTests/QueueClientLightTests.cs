@@ -10,9 +10,10 @@ namespace XCBatch.Core.UnitTests
             var queueClient = Core.Factory.GetBasicQueueInstance();
             queueClient.EnableDeadLetter = true;
 
-            var dispatchedClient = Scenarios.Queue.DispatchOneDeadLetter(queueClient);
+            var frontend = Scenarios.Queue.EnqueueOneDeadLetter(queueClient);
+            frontend.Dispatch();
 
-            Assert.Single(dispatchedClient.DeadLetters);
+            Assert.Single(frontend.DeadLetters);
         }
 
         [Fact()]
@@ -20,9 +21,10 @@ namespace XCBatch.Core.UnitTests
         {
             var queueClient = Core.Factory.GetBasicQueueInstance();
 
-            var dispatchedClient = Scenarios.Queue.DispatchOneDeadLetter(queueClient);
+            var frontend = Scenarios.Queue.EnqueueOneDeadLetter(queueClient);
+            frontend.Dispatch();
 
-            Assert.Empty(dispatchedClient.DeadLetters);
+            Assert.Empty(frontend.DeadLetters);
         }
     }
 }

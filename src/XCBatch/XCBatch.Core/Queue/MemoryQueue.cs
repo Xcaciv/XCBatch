@@ -15,7 +15,7 @@ namespace XCBatch.Core
         public bool IsEmpty => sourceQueue.Count == 0;
 
         /// <summary>
-        /// list used as queue to provide random access
+        /// serial queue for performance
         /// </summary>
         protected readonly Queue<ISource> sourceQueue = new Queue<ISource>();
 
@@ -64,7 +64,8 @@ namespace XCBatch.Core
 
         public void Dispose()
         {
-            // nothing to dispose
+            // let everything pass out of scope
         }
+
     }
 }

@@ -21,7 +21,7 @@ namespace XCBatch.Interfaces
         /// the life time of the Processor.</para>
         /// 
         /// <para>This class should be stateless but can take advantage of being warmed up 
-        /// before being called to process sevaral source.</para>
+        /// before being called to process several source.</para>
         /// </remarks>
         /// <param name="source"></param>
         /// <returns></returns>

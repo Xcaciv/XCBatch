@@ -193,8 +193,6 @@ namespace XCBatch.Core
         /// </summary>
         protected bool disposed = false;
 
-        ~QueueFrontend() => Dispose(false);
-
         /// <summary>
         /// cleaning up
         /// </summary>
@@ -210,7 +208,6 @@ namespace XCBatch.Core
         /// <param name="disposing"></param>
         protected virtual void Dispose(bool disposing)
         {
-            
             if (disposed)
             {
                 return;

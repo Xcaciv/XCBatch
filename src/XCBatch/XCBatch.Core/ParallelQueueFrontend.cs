@@ -319,8 +319,6 @@ namespace XCBatch.Core
         /// </summary>
         protected bool disposed = false;
 
-        ~ParallelQueueFrontend() => Dispose(false);
-
         /// <summary>
         /// cleaning up
         /// </summary>
@@ -345,7 +343,6 @@ namespace XCBatch.Core
 
                 if (disposing)
                 {
-                    backend.CompleteEnqueue();
                     backend.Dispose();
                 }
 
