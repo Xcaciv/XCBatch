@@ -115,6 +115,52 @@ namespace XCBatch.Core.Queue.Concurrent
             return new Source.SourceBlock<ISource>(new Enumerator(this));
         }
 
-        
+        protected object disposeLock = new object();
+
+        /// <summary>
+        /// To detect redundant calls
+        /// </summary>
+        protected bool disposed = false;
+
+        ~ConcurrentMemoryQueue() => Dispose(false);
+
+        /// <summary>
+        /// cleaning up
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            System.GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Protected implementation of Dispose pattern
+        /// </summary>
+        /// <param name="disposing"></param>
+        protected virtual void Dispose(bool disposing)
+        {
+            lock (disposeLock)
+            {
+                if (disposed)
+                {
+                    return;
+                }
+
+                if (disposing)
+                {
+                    CompleteEnqueue();
+                    foreach (var collectionList in sourceQueue.Values)
+                    {
+                        foreach (var collection in collectionList)
+                        {
+                            collection.Dispose();
+                        }
+                    }
+                }
+
+                disposed = true;
+            }
+        }
+
     }
 }

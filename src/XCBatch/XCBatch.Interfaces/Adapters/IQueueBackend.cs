@@ -8,7 +8,7 @@ namespace XCBatch.Interfaces.Adapters
     /// <remarks>
     /// The back-end
     /// </remarks>
-    public interface IQueueBackend
+    public interface IQueueBackend : System.IDisposable
     {
         /// <summary>
         /// Gets a value that indicates whether the queue is empty.

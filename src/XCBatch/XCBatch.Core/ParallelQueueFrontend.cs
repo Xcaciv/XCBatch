@@ -236,7 +236,7 @@ namespace XCBatch.Core
                 deadletters.Add(source);
                 return;
             }
-
+            
             var operationEndHandlers = this.onDeadletter;
             if (operationEndHandlers != null)
             {
@@ -310,6 +310,47 @@ namespace XCBatch.Core
             var replaced = this.processors.ContainsKey(processor.SourceType);
             this.processors[processor.SourceType] = processor;
             return replaced;
+        }
+
+        protected object disposeLock = new object();
+
+        /// <summary>
+        /// To detect redundant calls
+        /// </summary>
+        protected bool disposed = false;
+
+        ~ParallelQueueFrontend() => Dispose(false);
+
+        /// <summary>
+        /// cleaning up
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            System.GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Protected implementation of Dispose pattern
+        /// </summary>
+        /// <param name="disposing"></param>
+        protected virtual void Dispose(bool disposing)
+        {
+            lock (disposeLock)
+            {
+                if (disposed)
+                {
+                    return;
+                }
+
+                if (disposing)
+                {
+                    backend.CompleteEnqueue();
+                    backend.Dispose();
+                }
+
+                disposed = true;
+            }
         }
     }
 }

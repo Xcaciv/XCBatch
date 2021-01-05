@@ -106,11 +106,10 @@ Also, consider an advanced scenario where in you need to process large files and
 
 // TODO: Code example
 
-> **note:** Generally speaking a queue is not meant to store data, it is meant to ensure the processing of data.  Therefore, Batch 90 queues source information and not objects. Creating any sort of complex source objects is strongly discouraged as it will degrade this frameworks performance and efficiency.
+> **note:** It is important to note that generally speaking a queue is not meant to store data. It is meant to ensure the processing of data.  Therefore, Batch 90 queues source information and not object trees. Creating any sort of complex source objects is strongly discouraged as it will degrade this frameworks performance and efficiency. String parsing/serialization source data is also discouraged for this reason.
 
 ### TODO
 
-- add IDisposable to IQueueBackend and IQueueFrontend
 - Implement Processor factory
 - WCF distributed queue client
 - Azure Storage Queue

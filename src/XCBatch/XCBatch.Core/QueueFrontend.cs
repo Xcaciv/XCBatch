@@ -187,5 +187,41 @@ namespace XCBatch.Core
             this.processors[processor.SourceType] = processor;
             return replaced;
         }
+
+        /// <summary>
+        /// To detect redundant calls
+        /// </summary>
+        protected bool disposed = false;
+
+        ~QueueFrontend() => Dispose(false);
+
+        /// <summary>
+        /// cleaning up
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            System.GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Protected implementation of Dispose pattern
+        /// </summary>
+        /// <param name="disposing"></param>
+        protected virtual void Dispose(bool disposing)
+        {
+            
+            if (disposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                backend.Dispose();
+            }
+
+            disposed = true;
+        }
     }
 }

@@ -17,10 +17,11 @@ namespace XCBatch.Interfaces
         /// <para>The implementation must implicitly share knowledge of what is required to
         /// process the source.</para>
         /// 
-        /// <para>This method will be called with several different source objects during
+        /// <para>This method may be called with several different source objects during
         /// the life time of the Processor.</para>
         /// 
-        /// <para>This class should be stateless but can store instance local cache.</para>
+        /// <para>This class should be stateless but can take advantage of being warmed up 
+        /// before being called to process sevaral source.</para>
         /// </remarks>
         /// <param name="source"></param>
         /// <returns></returns>

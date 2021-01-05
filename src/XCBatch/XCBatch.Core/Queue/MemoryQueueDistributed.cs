@@ -82,5 +82,9 @@ namespace XCBatch.Core
             return indexedSources[distributionId];
         }
 
+        public void Dispose()
+        {
+            // nothing to clean up
+        }
     }
 }

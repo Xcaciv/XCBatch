@@ -5,7 +5,7 @@ namespace XCBatch.Interfaces
     /// <summary>
     /// minimum queue and dispatch facade
     /// </summary>
-    public interface IQueueFrontend
+    public interface IQueueFrontend : System.IDisposable
     {
         /// <summary>
         /// source that did not have a processor during dispatch

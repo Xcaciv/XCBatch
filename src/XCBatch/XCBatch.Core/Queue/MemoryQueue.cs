@@ -61,5 +61,10 @@ namespace XCBatch.Core
         {
             return new Source.SourceBlock<ISource>(sourceQueue);
         }
+
+        public void Dispose()
+        {
+            // nothing to dispose
+        }
     }
 }
