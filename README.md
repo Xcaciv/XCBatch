@@ -90,21 +90,84 @@ In the example we use Tasks instead of manual threads since they are more portab
 
 Horizontal scale is core to the cloud value proposition. Horizontal scale not only increases overall throughput but can also be used for higher fault tolerance through redundancy. If you are doing large batch processing you are probably looking to scale horizontally if you are not already doing it. Batch 90 is here to ease you transition and open up additional backend possibilities.
 
-// TODO: explain discrete producer/consumer workers
+The concept is basic: unlimited number of producers and consumers on any number of running environments. The number of each depends on the cost of the operation and this flexibility allows you to create highly optimized process chains that can self adjust based on current load. The the trade-off is that there is delay added in queueing such that very small operations will take more time even though you will be able to handle many more of these operations at one time.
+
+Implementation looks very similar to threaded queueing except the queue itself needs to be centrally reachable by all processes. This does not mean that the queue itself cannot be horizontally scalable, it just means that the queue must reside behind a single URI or be known by a shared name.
+
+**Application one:**
+
+    public void AddWork(IQueueFrontendSignaled queueClient)
+    {
+        for (int i = 0; i < 10000; ++i)
+        {
+            myQueue.Enqueue(new MySource() { SubjectId = i });
+        }
+        myQueue.CompleteEnqueue(); // tell other threads where the end is
+    }
+
+**Application two:**
+
+    public void DoWork(IQueueFrontendSignaled queueClient)
+    {
+        myQueue.Dispatch();
+    }
+
+The two applications must share `ISource` types and configure their queue backends to a shared communication chanel. This chanel can be a wide variety of things with a wide variety of availability and performance. A simple concept to understand would be a relational database. A slightly more complex and costly example could be an Enterprise Service Bus. It is also possible to use Batch 90 itself as this chanel by exposing it's API over the network using number of methods like REST or an RPC framework like WCF.
+
+### Optimize Distribution
+
+Once you have distributed your workload, optimization could then look at taking advantage of cache and persistance in particular processor types.  At it's most fundamental level Batch 90 facilitates this via its favorite data type: Int32. Giving your source an id for distributing jobs independent of source type allows you, the programmer, flexibility. If you or your queue backend prefers friendly names, simply associate a number to the name. Alternatively share an enum between your producers and consumers.
+
+To use Distribution Ids, simply set them on your source and request them on your dispatch while using a Frontend that supports it:
+
+**Shared enum:**
+
+    public enum MyDistribution
+    {
+        LongRunningDistribution,
+        SmallJobDistribution,
+        HotJobsDistribution
+    }
+
+**Application one:**
+
+    public void AddWork(IQueueFrontendSignaled queueClient)
+    {
+        for (int i = 0; i < 10000; ++i)
+        {
+            myQueue.Enqueue(new MySource() 
+            { 
+                SubjectId = i,
+                DistributionId = MyDistribution.SmallJobDistribution
+            });
+        }
+        myQueue.CompleteEnqueue(); // tell other threads where the end is
+    }
+
+**Application two:**
+
+    public void DoWork(IQueueFrontendSignaled queueClient)
+    {
+        myQueue.Dispatch(MyDistribution.SmallJobDistribution);
+    }
 
 ## Change to an Azure Service Bus
 
-// TODO: Code example
+Building on the above example, using Azure Service Bus is as easy as implementing a IQueueBackend to send source types to to a queue.
+
+    var queueClient = new ParallelQueueFrontend(new XcAzureQueue(myConfig));
 
 ## Block Queue
 
 Are your jobs faster using a warmed-up context? Group like jobs into blocks of work:
 
-// TODO: Code example
+    // TODO: Code example
+
+## Processor Result Requeuing
 
 Also, consider an advanced scenario where in you need to process large files and take individual actions on each record in the file. You place the file to be processed in the Azure Storage Queue so that if the worker is interrupted, another can take over. Each of the resulting records is placed in a database and queued to be processed via the Azure Service Bus Queue:
 
-// TODO: Code example
+    // TODO: Code example
 
 > **note:** It is important to note that generally speaking a queue is not meant to store data. It is meant to ensure the processing of data.  Therefore, Batch 90 queues source information and not object trees. Creating any sort of complex source objects is strongly discouraged as it will degrade this frameworks performance and efficiency. String parsing/serialization source data is also discouraged for this reason.
 
