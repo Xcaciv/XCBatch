@@ -165,7 +165,7 @@ Are your jobs faster using a warmed-up context? Group like jobs into blocks of w
 
 ## Processor Result Requeuing
 
-Also, consider an advanced scenario where in you need to process large files and take individual actions on each record in the file. You place the file to be processed in the Azure Storage Queue so that if the worker is interrupted, another can take over. Each of the resulting records is placed in a database and queued to be processed via the Azure Service Bus Queue:
+It is sometimes useful to break a process into stages and hand each stage off to a processor that can perform that stage in an optimized manner. Consider a scenario where in you need to process large files and take individual actions on each record in the file. You place the file to be processed in the Azure Storage Queue so that if the worker is interrupted, another can take over. Each of the resulting records is placed in a database and queued to be processed via the Azure Service Bus Queue:
 
     // TODO: Code example
 
@@ -173,7 +173,7 @@ Also, consider an advanced scenario where in you need to process large files and
 
 ### TODO
 
-- Implement Processor factory
+- Implement Processor factory for stateless processors
 - WCF distributed queue client
 - Azure Storage Queue
 - Azure Message Queue
