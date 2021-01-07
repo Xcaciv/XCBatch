@@ -13,7 +13,9 @@ namespace XCBatch.Core
     /// a secondary queue that may be remote or slower than a memory queue.
     /// </summary>
     /// <remarks>
-    /// <para></para>
+    /// <para>The default buffer uses a bound memory queue that will wait to enqueue when 
+    /// the queue hits 30k. To raise this limit configure your own IQueueBackendSignaled and 
+    /// pass it in.</para>
     /// </remarks>
     public class BufferedQueueFrontend : ParallelQueueFrontend
     {
@@ -41,7 +43,7 @@ namespace XCBatch.Core
         /// <param name="flushJobs"></param>
         public BufferedQueueFrontend(IQueueBackendSignaled backendQueue, int timeoutSeconds = 1, int bufferNodes = 3, int flushJobs = 2, IQueueBackendSignaled buffer = null) : base(backendQueue)
         {
-            bufferQueue = buffer ?? new Queue.Concurrent.ConcurrentMemoryQueue(bufferNodes, timeoutSeconds);
+            bufferQueue = buffer ?? new Queue.Concurrent.ConcurrentMemoryQueueBound(collectionNodes: bufferNodes, timeoutSeconds: timeoutSeconds);
 
             timeout = timeoutSeconds;
 

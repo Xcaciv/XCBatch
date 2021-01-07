@@ -20,7 +20,7 @@ namespace XCBatch.Core.Queue.Concurrent
         /// thread safe queue collection
         /// </summary>
         protected ConcurrentDictionary<int, BlockingCollection<ISource>[]> sourceQueue = new ConcurrentDictionary<int, BlockingCollection<ISource>[]>();
-        protected int timeout;
+        protected readonly int timeout;
 
         public ConcurrentMemoryQueue(int collectionNodes = 3, int timeoutSeconds = 1)
         {
@@ -28,7 +28,7 @@ namespace XCBatch.Core.Queue.Concurrent
             sourceQueue[-1] = BuildCollectionNodes(collectionNodes);
         }
 
-        public static BlockingCollection<ISource>[] BuildCollectionNodes(int collectionNodeCount)
+        protected BlockingCollection<ISource>[] BuildCollectionNodes(int collectionNodeCount)
         {
             var nodes = new List<BlockingCollection<ISource>>();
             for (int i = 0; i < collectionNodeCount; i++)

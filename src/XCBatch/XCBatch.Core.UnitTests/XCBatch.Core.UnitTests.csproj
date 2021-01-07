@@ -4,6 +4,10 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
 
     <IsPackable>false</IsPackable>
+
+    <Version>1.0.1</Version>
+
+    <Authors>XCACIV Team</Authors>
   </PropertyGroup>
 
   <ItemGroup>
