@@ -29,8 +29,17 @@ steps:
 
 - task: VSTest@2
   inputs:
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
+    testSelector: 'testAssemblies'
+    testAssemblyVer2: |
+      **\*UnitTests.dll
+      !**\*TestAdapter.dll
+      !**\obj\**
+    searchFolder: '$(System.DefaultWorkingDirectory)'
+    runOnlyImpactedTests: true
+    runAllTestsAfterXBuilds: '10'
+    runInParallel: true
+    runTestsInIsolation: true
+    codeCoverageEnabled: true
 
 - task: NuGetCommand@2
   inputs:
