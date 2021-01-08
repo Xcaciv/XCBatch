@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFrameworks>netstandard2.0;net472</TargetFrameworks>
     <Authors>XCACIV Team</Authors>
     <Product>Batch 90 Core</Product>
     <Description>Batch 90 (XCBatch) a queue and batch framework</Description>
@@ -12,10 +12,11 @@
     <PackageTags>c# queue batch azure</PackageTags>
     <NeutralLanguage></NeutralLanguage>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>1.0.4</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\XCBatch.Interfaces\XCBatch.Interfaces.csproj" />
+    <PackageReference Include="XCBatch.Interfaces" Version="1.0.3" />
   </ItemGroup>
 
 </Project>

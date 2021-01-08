@@ -25,9 +25,8 @@ namespace XCBatch.Core
         /// <returns></returns>
         public ISource Dequeue()
         {
-            ISource item = null;
-            sourceQueue.TryDequeue(out item);
-            return item;
+            if (IsEmpty) return null;
+            return sourceQueue.Dequeue();
         }
 
         /// <summary>
