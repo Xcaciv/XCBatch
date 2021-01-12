@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using XCBatch.Interfaces;
 using XCBatch.Interfaces.Adapters;
@@ -27,12 +25,17 @@ namespace XCBatch.Core
         /// <summary>
         /// tasks for moving source to backend queue
         /// </summary>
-        protected List<Task> flushThreads;
+        protected List<Task> flushThreads = new List<Task>();
 
         /// <summary>
         /// timeout for collection reads
         /// </summary>
         protected int timeout;
+
+        /// <summary>
+        /// number of flush jobs to be running
+        /// </summary>
+        private int flushJobsCount;
 
         /// <summary>
         /// construct fronted with a fast bufferQueue and a slower queue
@@ -46,13 +49,16 @@ namespace XCBatch.Core
             bufferQueue = buffer ?? new Queue.Concurrent.ConcurrentMemoryQueueBound(collectionNodes: bufferNodes, timeoutSeconds: timeoutSeconds);
 
             timeout = timeoutSeconds;
+            flushJobsCount = flushJobs;
+        }
 
-            for (int i = 0; i < flushJobs; i++)
+        private void InitFlush()
+        {
+            if (flushThreads.Count >= flushJobsCount) return;
+            for (int i = 0; i < flushJobsCount; i++)
             {
-                var t = timeoutSeconds;
                 flushThreads.Add(Task.Factory.StartNew(() => Flush()));
             }
-             
         }
 
         /// <summary>
@@ -76,6 +82,8 @@ namespace XCBatch.Core
         /// <param name="source"></param>
         new public void Enqueue(ISource source)
         {
+            InitFlush();
+
             bufferQueue.Enqueue(source);
         }
 

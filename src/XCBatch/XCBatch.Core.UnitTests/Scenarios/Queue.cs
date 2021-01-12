@@ -1,4 +1,5 @@
-﻿using XCBatch.Core.UnitTests.Implementations;
+﻿using System.Threading.Tasks;
+using XCBatch.Core.UnitTests.Implementations;
 using XCBatch.Interfaces;
 
 namespace XCBatch.Core.UnitTests.Scenarios
@@ -40,8 +41,31 @@ namespace XCBatch.Core.UnitTests.Scenarios
             }
 
             IProcessor<ISource> aProcessor = new ParallelProcessor();
-
             queueClient.RegisterProcessor(aProcessor);
+
+            return queueClient;
+        }
+
+
+        public static IQueueFrontend EnqueueManyProcessParallel(IQueueFrontendSignaled queueClient, int queueLength = 1000)
+        {
+
+            IProcessor<ISource> aProcessor = new ParallelProcessor();
+            queueClient.RegisterProcessor(aProcessor);
+
+            var dispatchTask = Task.Factory.StartNew(() => queueClient.Dispatch());
+
+            for (int i = 1; i <= queueLength; i++)
+            {
+                queueClient.Enqueue(new SourceOne()
+                {
+                    SubjectId = i
+                });
+            }
+
+            queueClient.CompleteEnqueue();
+
+            dispatchTask.Wait();
 
             return queueClient;
         }
