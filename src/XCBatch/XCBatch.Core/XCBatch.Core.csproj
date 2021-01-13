@@ -12,11 +12,16 @@
     <PackageTags>c# queue batch azure</PackageTags>
     <NeutralLanguage></NeutralLanguage>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.4</Version>
+    <Version>1.0.6</Version>
+    <AssemblyVersion>1.0.4.146</AssemblyVersion>
+    <FileVersion>1.0.4.146</FileVersion>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>scbcKey.pfx</AssemblyOriginatorKeyFile>
+    <DelaySign>false</DelaySign>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="XCBatch.Interfaces" Version="1.0.3" />
+    <PackageReference Include="XCBatch.Interfaces" Version="1.0.4" />
   </ItemGroup>
 
 </Project>
