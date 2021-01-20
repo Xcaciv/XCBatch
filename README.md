@@ -8,6 +8,18 @@
 
 ## Get Started
 
+## Installation
+
+From Visual Studio Package Manager Console:
+
+    PM> Install-Package XCBatch.Core
+
+From dotnet CLI:
+
+    > dotnet add package XCBatch.Core --version 1.0.7
+
+For more information visit the [nuget page](https://www.nuget.org/packages/XCBatch.Core/).
+
 ### Queue some and Do some
 
 The basics are to do work in an organized manner and take advantage of one of the basic implementations.
