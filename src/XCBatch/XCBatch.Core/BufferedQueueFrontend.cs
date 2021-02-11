@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using XCBatch.Interfaces;
 using XCBatch.Interfaces.Adapters;
@@ -33,9 +34,14 @@ namespace XCBatch.Core
         protected int timeout;
 
         /// <summary>
-        /// number of flush jobs to be running
+        /// limit the number of flush jobs to be running
         /// </summary>
-        private int flushJobsCount;
+        private readonly int flushJobsCount;
+
+        /// <summary>
+        /// token for cancel check
+        /// </summary>
+        protected readonly CancellationToken cancelToken;
 
         /// <summary>
         /// construct fronted with a fast bufferQueue and a slower queue
@@ -44,20 +50,25 @@ namespace XCBatch.Core
         /// <param name="timeoutSeconds"></param>
         /// <param name="bufferNodes"></param>
         /// <param name="flushJobs"></param>
-        public BufferedQueueFrontend(IQueueBackendSignaled backendQueue, int timeoutSeconds = 1, int bufferNodes = 3, int flushJobs = 2, IQueueBackendSignaled buffer = null) : base(backendQueue)
+        public BufferedQueueFrontend(IQueueBackendSignaled backendQueue, int timeoutSeconds = 1, int bufferNodes = 3, int flushJobs = 2, IQueueBackendSignaled buffer = null, CancellationToken cancellationToken = default) 
+            : base(backendQueue)
         {
             bufferQueue = buffer ?? new Queue.Concurrent.ConcurrentMemoryQueueBound(collectionNodes: bufferNodes, timeoutSeconds: timeoutSeconds);
 
             timeout = timeoutSeconds;
             flushJobsCount = flushJobs;
+
+            cancelToken = cancellationToken;
         }
 
         private void InitFlush()
         {
             if (flushThreads.Count >= flushJobsCount) return;
-            for (int i = 0; i < flushJobsCount; i++)
+
+            var tasksToAdd = (flushJobsCount - flushThreads.Count);
+            for (int i = 0; i < tasksToAdd; i++)
             {
-                flushThreads.Add(Task.Factory.StartNew(() => Flush()));
+                flushThreads.Add(Task.Factory.StartNew(Flush));
             }
         }
 
@@ -69,6 +80,8 @@ namespace XCBatch.Core
         {
             while (!bufferQueue.IsEmpty)
             {
+                if (cancelToken.IsCancellationRequested) break;
+                
                 ISource source = bufferQueue.Dequeue();
                 base.backend.Enqueue(source);
             }
@@ -95,6 +108,7 @@ namespace XCBatch.Core
         {
             foreach(var source in sources)
             {
+                if (cancelToken.IsCancellationRequested) break;
                 bufferQueue.Enqueue(source);
             }
         }

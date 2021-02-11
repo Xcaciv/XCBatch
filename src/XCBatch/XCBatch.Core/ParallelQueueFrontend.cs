@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using XCBatch.Interfaces;
 using XCBatch.Interfaces.Adapters;
@@ -23,12 +24,18 @@ namespace XCBatch.Core
         /// Source without a matching processor at the time of dispatch
         /// </summary>
         public IEnumerable<ISource> DeadLetters => deadletters.ToArray();
+        /// <summary>
+        /// internal dead letter list
+        /// </summary>
         protected ConcurrentBag<ISource> deadletters = new ConcurrentBag<ISource>();
 
         /// <summary>
         /// result of processors that were unable to finish or had errors
         /// </summary>
         public IEnumerable<IProcessResultState> Unsuccessful => unsuccessful.ToArray();
+        /// <summary>
+        /// internal processor unsuccessful result list
+        /// </summary>
         protected ConcurrentBag<IProcessResultState> unsuccessful = new ConcurrentBag<IProcessResultState>();
 
         /// <summary>
@@ -42,22 +49,36 @@ namespace XCBatch.Core
         /// <para>This is only populated when EnableSaveSuccess is set to true.</para>
         /// </remarks>
         public IEnumerable<IProcessResultState> Successful => successful.ToArray();
+        /// <summary>
+        /// internal processor success result list
+        /// </summary>
         protected ConcurrentBag<IProcessResultState> successful = new ConcurrentBag<IProcessResultState>();
-
+        /// <summary>
+        /// backend instance
+        /// </summary>
         protected readonly IQueueBackendSignaled backend;
+        /// <summary>
+        /// token for signaling cancellation from thread or process
+        /// </summary>
+        private readonly CancellationToken cancelToken;
 
         /// <summary>
         /// constructor requiring a thread safe back-end
         /// </summary>
         /// <param name="queue"></param>
-        public ParallelQueueFrontend(IQueueBackendSignaled queue) => backend = queue;
+        public ParallelQueueFrontend(IQueueBackendSignaled queue, CancellationToken cancellationToken = default)
+        {
+            backend = queue;
+            cancelToken = cancellationToken;
+        }
 
         /// <summary>
         /// process queue in parallel limited by system thread pool settings
         /// </summary>
         public void Dispatch()
         {
-            Parallel.ForEach(new Queue.Enumerator(backend), (source) => Dispatch(source));
+            if (cancelToken.IsCancellationRequested) return;
+            Parallel.ForEach(new Queue.Enumerator(backend), Dispatch);
         }
 
         /// <summary>
@@ -66,7 +87,7 @@ namespace XCBatch.Core
         /// <param name="source"></param>
         public void Dispatch(ISource source)
         {
-            if (source == null) return;
+            if (source == null || cancelToken.IsCancellationRequested) return;
 
             try
             {
@@ -120,8 +141,14 @@ namespace XCBatch.Core
             this.EnqueueRange(requeueable.GetQueueableResults());
         }
 
+        /// <summary>
+        /// a delegate signature for requeuing results
+        /// </summary>
+        /// <param name="resultState"></param>
         public delegate void RequeueableHandler(IProcessResultState resultState);
-
+        /// <summary>
+        /// event handle fired when a result is rerequeueable
+        /// </summary>
         protected event RequeueableHandler onRequeueable;
 
         /// <summary>
@@ -162,9 +189,18 @@ namespace XCBatch.Core
             }
         }
 
+        /// <summary>
+        /// a delegate signature for successfully processed source
+        /// </summary>
+        /// <param name="resultState"></param>
+        /// <param name="source"></param>
         public delegate void SuccessfulHandler(IProcessResultState resultState, ISource source);
 
+        /// <summary>
+        /// event handle fired for successfully processed source
+        /// </summary>
         protected event SuccessfulHandler onSuccessful;
+
         /// <summary>
         /// event triggered when an un-processable source is dequeued
         /// NOTE: Must be thread safe
@@ -206,9 +242,18 @@ namespace XCBatch.Core
 
         }
 
+        /// <summary>
+        /// a delegate signature for unsuccessful source processing
+        /// </summary>
+        /// <param name="resultState"></param>
+        /// <param name="source"></param>
         public delegate void UnsuccessfulHandler(IProcessResultState resultState, ISource source);
 
+        /// <summary>
+        /// event handle fired for unsuccessful source processing 
+        /// </summary>
         protected event UnsuccessfulHandler onUnsuccessful;
+
         /// <summary>
         /// event triggered when an un-processable source is dequeued
         /// NOTE: Must be thread safe
@@ -246,10 +291,17 @@ namespace XCBatch.Core
                 }
             }
         }
-
+        /// <summary>
+        /// a delegate signature for deadletter handling
+        /// </summary>
+        /// <param name="source"></param>
         public delegate void DeadLetterHandler(ISource source);
 
+        /// <summary>
+        /// a delegate signature for deadletter results
+        /// </summary>
         protected event DeadLetterHandler onDeadletter;
+
         /// <summary>
         /// event triggered when an un-processable source is dequeued
         /// NOTE: Must be thread safe
@@ -266,8 +318,13 @@ namespace XCBatch.Core
             remove { this.onDeadletter -= value; }
         }
 
+        /// <summary>
+        /// implementation of IQueueFrontend
+        /// </summary>
+        /// <param name="source"></param>
         public void Enqueue(ISource source)
         {
+            if (cancelToken.IsCancellationRequested) return;
             backend.Enqueue(source);
         }
 
@@ -280,6 +337,7 @@ namespace XCBatch.Core
         /// <param name="source"></param>
         public void EnqueueRange(IEnumerable<ISource> source)
         {
+            if (cancelToken.IsCancellationRequested) return;
             backend.EnqueueRange(source);
         }
 
