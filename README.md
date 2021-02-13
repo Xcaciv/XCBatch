@@ -2,11 +2,18 @@
 
 ## The universal batch/queue interface layer
 
-**Who is this for?** You want to horizontally scale a workload. You want to take advantage of cloud resources where available, but you don't want to have to build different batch applications to leverage these managed cloud queues.
+**Who is this for?**
 
-**What does it do?** *Throw down a little Batch 90* and adapt to a variety of running environments by using configuration. Flexibly use a database backend, an in-memory queue, or any combination with managed queue backend including Amazon MQ and Azure Service Bus.
+* You are building a batch processing system and want it to horizontally scale.
+* You are using some queues and you are thinking about taking advantage of the resilience of managed queues in the cloud.
+* You are thinking about using queues as inter-process communication, and maybe doing some distributed workloads using queues.
+* You want to take advantage of a cloud or bus where available, but you don't want to have tight coupling.
 
-## Get Started
+**What does it do?**
+
+*Batch 90* gives you generic interfaces and default implementations that ease you into using a managed queue service. It provides thread safe in-memory implementations for when you want to use a queue for coordinating your parallel jobs or threads. Run the same code on-prem, in the cloud or on a mobile device. Use an in-memory queue, an ESB or a managed queue backend including Amazon MQ and Azure Service Bus, or even a relational database backend. Even build your own backend to act however you need.
+
+# Get Started
 
 ## Installation
 
@@ -186,13 +193,14 @@ It is sometimes useful to break a process into stages and hand each stage off to
 ### TODO
 
 - Implement Processor factory for stateless processors
-- WCF distributed queue client
+- WCF distributed queue & client
+- gRPC distributed queue & client
 - Azure Storage Queue
 - Azure Message Queue
 - RabbitMQ
 - Redis
 - Amazon MQ
-- other
+- other?
 
 ### FAQ
 
