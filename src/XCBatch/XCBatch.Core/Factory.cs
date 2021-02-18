@@ -12,7 +12,7 @@
             return new ParallelQueueFrontend(new Queue.Concurrent.ConcurrentMemoryQueue());
         }
 
-        public static BufferedQueueFrontend GetBufferedQueueInstance(int buffers = 3, int timeoutSeconds = 1)
+        public static BufferedQueueFrontend GetBufferedQueueInstance(int buffers = 3, int timeoutSeconds = 0)
         {
             return new BufferedQueueFrontend(new Queue.Concurrent.ConcurrentMemoryQueue(buffers, timeoutSeconds), timeoutSeconds, buffers);
         }

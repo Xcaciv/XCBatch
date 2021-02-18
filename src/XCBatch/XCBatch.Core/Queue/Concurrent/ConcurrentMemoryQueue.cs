@@ -20,12 +20,36 @@ namespace XCBatch.Core.Queue.Concurrent
         /// thread safe queue collection
         /// </summary>
         protected ConcurrentDictionary<int, BlockingCollection<ISource>[]> sourceQueue = new ConcurrentDictionary<int, BlockingCollection<ISource>[]>();
+
+        /// <summary>
+        /// queue for generic round-robin dequeue
+        /// </summary>
+        protected ConcurrentQueue<int> sourceIndexQueue = new ConcurrentQueue<int>();
+
+        /// <summary>
+        /// maximum number of milliseconds to wait for response from concurrent collections
+        /// </summary>
         protected readonly int timeout;
 
-        public ConcurrentMemoryQueue(int collectionNodes = 3, int timeoutSeconds = 1)
+        /// <summary>
+        /// number of nodes to create in blocking collection
+        /// </summary>
+        private readonly int collectionNodes;
+
+        public ConcurrentMemoryQueue(int collectionNodes = 3, int timeoutMilliseconds = 0)
         {
-            timeout = timeoutSeconds;
-            sourceQueue[-1] = BuildCollectionNodes(collectionNodes);
+            this.timeout = timeoutMilliseconds;
+            this.collectionNodes = collectionNodes;
+            verifyOrInitDistribution(-1);
+        }
+
+        private void verifyOrInitDistribution(int distributionId)
+        {
+            if (!sourceQueue.ContainsKey(distributionId))
+            {
+                sourceQueue[distributionId] = BuildCollectionNodes(collectionNodes);
+                sourceIndexQueue.Enqueue(distributionId);
+            }
         }
 
         protected BlockingCollection<ISource>[] BuildCollectionNodes(int collectionNodeCount)
@@ -54,6 +78,7 @@ namespace XCBatch.Core.Queue.Concurrent
         /// <returns>void for performance reasons</returns>
         public void Enqueue(ISource source)
         {
+            verifyOrInitDistribution(source.DistributionId);
             BlockingCollection<ISource>.TryAddToAny(sourceQueue[source.DistributionId], source, timeout);
         }
 
@@ -87,9 +112,17 @@ namespace XCBatch.Core.Queue.Concurrent
         /// <returns></returns>
         public ISource Dequeue()
         {
-            ISource item;
-            var key = sourceQueue.Keys.FirstOrDefault();
-            BlockingCollection<ISource>.TryTakeFromAny(sourceQueue[key], out item, timeout * 1000);
+            ISource item = null;
+            while(item == null && !this.IsEmpty && !this.sourceIndexQueue.IsEmpty)
+            {
+                int key;
+                if (sourceIndexQueue.TryDequeue(out key))
+                {
+                    item = this.Dequeue(key);
+                    sourceIndexQueue.Enqueue(key);
+                }
+            }
+            
             return item;
         }
 
@@ -100,8 +133,8 @@ namespace XCBatch.Core.Queue.Concurrent
         /// <returns></returns>
         public ISource Dequeue(int distributionId)
         {
-            ISource item;
-            BlockingCollection<ISource>.TryTakeFromAny(sourceQueue[distributionId], out item, timeout * 1000);
+            ISource item = null;
+            BlockingCollection<ISource>.TryTakeFromAny(sourceQueue[distributionId], out item, timeout);
             return item;
         }
 

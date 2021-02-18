@@ -13,12 +13,17 @@ namespace XCBatch.Core
         /// <summary>
         /// current queue quantity
         /// </summary>
-        public bool IsEmpty => !indexedSources.Any(o => o.Value.Count > 0);
+        public bool IsEmpty => !sourceQueue.Any(o => o.Value.Count > 0);
 
         /// <summary>
         /// sources indexed distribution id then by type
         /// </summary>
-        protected readonly Dictionary<int, Queue<ISource>> indexedSources = new Dictionary<int, Queue<ISource>>();
+        protected readonly Dictionary<int, Queue<ISource>> sourceQueue = new Dictionary<int, Queue<ISource>>();
+
+        /// <summary>
+        /// queue for generic round-robin dequeue
+        /// </summary>
+        protected Queue<int> sourceIndexQueue = new Queue<int>();
 
         /// <summary>
         /// dequeue next source from next source list
@@ -27,18 +32,26 @@ namespace XCBatch.Core
         /// <para>The effect of removing the list from the dictionary and reading it should put it at the end</para>
         /// </remarks>
         /// <returns></returns>
+        /// <summary>
+        /// retrieve and remove the first item from the queue
+        /// </summary>
+        /// <returns></returns>
         public ISource Dequeue()
         {
-            if (indexedSources.Count == 0) return null;
+            ISource item = null;
+            while (item == null && !this.IsEmpty && this.sourceIndexQueue.Count > 0)
+            {
+                int key = sourceIndexQueue.Dequeue();
+                item = this.Dequeue(key);
+                sourceIndexQueue.Enqueue(key);
+            }
 
-            var distributionId = indexedSources.Keys.FirstOrDefault();
-            
-            return Dequeue(distributionId);
+            return item;
         }
 
         public ISource Dequeue(int distributionId)
         {
-            return indexedSources[distributionId].Dequeue();
+            return sourceQueue[distributionId].Dequeue();
         }
 
         /// <summary>
@@ -48,7 +61,7 @@ namespace XCBatch.Core
         /// <returns></returns>
         public void Enqueue(ISource source)
         {
-            var queue = this.InitializeStorage(source.DistributionId);
+            var queue = this.InitializeAndReturnStorage(source.DistributionId);
             queue.Enqueue(source);
             
         }
@@ -72,14 +85,15 @@ namespace XCBatch.Core
         /// </summary>
         /// <param name="sourceTypeName"></param>
         /// <param name="distributionId"></param>
-        protected Queue<ISource> InitializeStorage(int distributionId)
+        protected Queue<ISource> InitializeAndReturnStorage(int distributionId)
         {
-            if (!indexedSources.ContainsKey(distributionId))
+            if (!sourceQueue.ContainsKey(distributionId))
             {
-                indexedSources[distributionId] = new Queue<ISource>();
+                sourceQueue[distributionId] = new Queue<ISource>();
+                sourceIndexQueue.Enqueue(distributionId);
             }
 
-            return indexedSources[distributionId];
+            return sourceQueue[distributionId];
         }
 
         public void Dispose()
