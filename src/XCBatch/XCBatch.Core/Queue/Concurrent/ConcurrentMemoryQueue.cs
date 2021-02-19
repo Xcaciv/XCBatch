@@ -40,25 +40,18 @@ namespace XCBatch.Core.Queue.Concurrent
         {
             this.timeout = timeoutMilliseconds;
             this.collectionNodes = collectionNodes;
-            verifyOrInitDistribution(-1);
+            this.sourceQueue.GetOrAdd(-1, (_) => BuildCollectionNodes(collectionNodes));
         }
 
-        private void verifyOrInitDistribution(int distributionId)
-        {
-            if (!sourceQueue.ContainsKey(distributionId))
-            {
-                sourceQueue[distributionId] = BuildCollectionNodes(collectionNodes);
-                sourceIndexQueue.Enqueue(distributionId);
-            }
-        }
-
-        protected BlockingCollection<ISource>[] BuildCollectionNodes(int collectionNodeCount)
+        protected BlockingCollection<ISource>[] BuildCollectionNodes(int collectionNodeCount, ISource source = null)
         {
             var nodes = new List<BlockingCollection<ISource>>();
             for (int i = 0; i < collectionNodeCount; i++)
             {
                 nodes.Add(new BlockingCollection<ISource>());
             }
+
+            if (source != null) nodes[0].Add(source);
 
             return nodes.ToArray();
         }
@@ -78,8 +71,34 @@ namespace XCBatch.Core.Queue.Concurrent
         /// <returns>void for performance reasons</returns>
         public void Enqueue(ISource source)
         {
-            verifyOrInitDistribution(source.DistributionId);
-            BlockingCollection<ISource>.TryAddToAny(sourceQueue[source.DistributionId], source, timeout);
+            var newId = false;
+
+#if netcore
+            sourceQueue.AddOrUpdate(source.DistributionId, 
+                (_, s) => {
+                    newId = true;
+                    return BuildCollectionNodes(collectionNodes, s);
+                }, 
+                (_, value, s) => { 
+                    BlockingCollection<ISource>.TryAddToAny(value, s, timeout);
+                    return value;
+                }, source);
+#else
+            sourceQueue.AddOrUpdate(source.DistributionId,
+                (_) => {
+                    newId = true;
+                    return BuildCollectionNodes(collectionNodes, source);
+                },
+                (_, value) => {
+                    BlockingCollection<ISource>.TryAddToAny(value, source, timeout);
+                    return value;
+                });
+#endif
+
+            if (newId)
+            {
+                sourceIndexQueue.Enqueue(source.DistributionId);
+            }
         }
 
         /// <summary>
@@ -106,8 +125,9 @@ namespace XCBatch.Core.Queue.Concurrent
         {
             Parallel.ForEach(sourceQueue[DistributionId], (queue) => queue.CompleteAdding());
         }
+
         /// <summary>
-        /// retrieve and remove the first item from the queue
+        /// retrieve and remove the next round-robin item from the queue
         /// </summary>
         /// <returns></returns>
         public ISource Dequeue()
@@ -119,7 +139,16 @@ namespace XCBatch.Core.Queue.Concurrent
                 if (sourceIndexQueue.TryDequeue(out key))
                 {
                     item = this.Dequeue(key);
-                    sourceIndexQueue.Enqueue(key);
+                    // if a distribution finishes, remove it
+                    if (sourceQueue[item.DistributionId].All(o => o.IsCompleted))
+                    {
+                        sourceQueue.TryRemove(item.DistributionId, out _);
+                    }
+                    else
+                    {
+                        // if a distribution has more to process queue it up for round-robin
+                        sourceIndexQueue.Enqueue(key);
+                    }
                 }
             }
             

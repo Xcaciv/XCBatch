@@ -21,13 +21,15 @@ namespace XCBatch.Core.Queue.Concurrent
             upperBoundry = upperNodeBoundry;
         }
 
-        new protected BlockingCollection<ISource>[] BuildCollectionNodes(int collectionNodeCount)
+        new protected BlockingCollection<ISource>[] BuildCollectionNodes(int collectionNodeCount, ISource source = null)
         {
             var nodes = new List<BlockingCollection<ISource>>();
             for (int i = 0; i < collectionNodeCount; i++)
             {
                 nodes.Add(new BlockingCollection<ISource>(upperBoundry));
             }
+
+            if (source != null) nodes[0].Add(source);
 
             return nodes.ToArray();
         }
