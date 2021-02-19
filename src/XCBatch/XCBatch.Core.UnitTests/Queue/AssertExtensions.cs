@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using XCBatch.Core.Queue.Concurrent;
 using XCBatch.Core.UnitTests.Implementations;
 using XCBatch.Interfaces.Adapters;
@@ -79,6 +80,43 @@ namespace XCBatch.Core.UnitTests.Queue
             }
         }
 
+        internal static void ShouldFinishEnumeration(this IQueueBackend queue, int sourceCount = 5, int distributions = 3)
+        {
+            for (int i = 0; i < distributions; i++)
+            {
+                for (int s = 0; s < sourceCount; s++)
+                {
+                    queue.Enqueue(new SourceOne() { SubjectId = s, DistributionId = i });
+                }
+            }
 
+            // signal end of queuing if needed
+            if (queue is IQueueBackendSignaled queueBackendSignaled)
+            {
+                (queueBackendSignaled).CompleteEnqueue();
+            }
+
+            foreach (var source in new XCBatch.Core.Queue.Enumerator(queue)) { Assert.NotNull(source); }
+        }
+
+        internal static void ShouldFinishEnumerationInParallel(this IQueueBackendSignaled queue, int sourceCount = 5, int distributions = 3)
+        {
+            for (int i = 0; i < distributions; i++)
+            {
+                for (int s = 0; s < sourceCount; s++)
+                {
+                    queue.Enqueue(new SourceOne() { SubjectId = s, DistributionId = i });
+                }
+            }
+
+            var dequeueTask = Task.Factory.StartNew(() =>
+            {
+                foreach (var source in new XCBatch.Core.Queue.Enumerator(queue)) { Assert.NotNull(source); }
+            });
+
+            queue.CompleteEnqueue();
+
+            dequeueTask.Wait();
+        }
     }
 }

@@ -9,8 +9,6 @@ namespace XCBatch.Core.UnitTests.Implementations
     {
         public Type SourceType => typeof(SourceOne);
 
-        public IProcessResultState ExpectedStatus { get; set; }
-
         public IProcessResultState Process(ISource source)
         {
             Task.Delay((new Random()).Next(188));

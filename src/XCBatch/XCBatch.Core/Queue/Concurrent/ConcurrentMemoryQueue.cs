@@ -40,7 +40,6 @@ namespace XCBatch.Core.Queue.Concurrent
         {
             this.timeout = timeoutMilliseconds;
             this.collectionNodes = collectionNodes;
-            this.sourceQueue.GetOrAdd(-1, (_) => BuildCollectionNodes(collectionNodes));
         }
 
         protected BlockingCollection<ISource>[] BuildCollectionNodes(int collectionNodeCount, ISource source = null)

@@ -53,8 +53,6 @@ namespace XCBatch.Core.UnitTests.Scenarios
             IProcessor<ISource> aProcessor = new ParallelProcessor();
             queueClient.RegisterProcessor(aProcessor);
 
-            var dispatchTask = Task.Factory.StartNew(() => queueClient.Dispatch());
-
             for (int i = 1; i <= queueLength; i++)
             {
                 queueClient.Enqueue(new SourceOne()
@@ -64,6 +62,8 @@ namespace XCBatch.Core.UnitTests.Scenarios
             }
 
             queueClient.CompleteEnqueue();
+
+            var dispatchTask = Task.Factory.StartNew(() => queueClient.Dispatch());
 
             dispatchTask.Wait();
 

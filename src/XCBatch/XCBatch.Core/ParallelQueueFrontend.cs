@@ -91,10 +91,11 @@ namespace XCBatch.Core
 
             try
             {
+                IProcessor<ISource> processor;
                 var sourceType = source.GetType();
-                if (processors.ContainsKey(sourceType))
+                if (processors.TryGetValue(sourceType, out processor))
                 {
-                    var resultState = processors[sourceType].Process(source);
+                    var resultState = processor.Process(source);
 
                     if (resultState is ProcessResultState.Success)
                     {
