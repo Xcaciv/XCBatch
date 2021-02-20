@@ -61,7 +61,12 @@ namespace XCBatch.Core.Queue.Concurrent
         /// <remarks>
         /// this property indicates that CompleteEnqueue() has been called and all queues are empty
         /// </remarks>
-        public bool IsEmpty => sourceQueue.Values.All(o => o.All(x => x.IsCompleted));
+        public bool IsEmpty => sourceQueue.Values.All(o => o.All(x => x.Count == 0));
+
+        /// <summary>
+        /// current queue completion status
+        /// </summary>
+        public bool IsComplete => sourceQueue.Values.All(o => o.All(x => x.IsCompleted));
 
         /// <summary>
         /// add source to the FIFO queue
@@ -132,14 +137,16 @@ namespace XCBatch.Core.Queue.Concurrent
         public ISource Dequeue()
         {
             ISource item = null;
-            while(item == null && !this.IsEmpty && !this.sourceIndexQueue.IsEmpty)
+            while(item == null && !this.IsComplete)
             {
                 int key;
                 if (sourceIndexQueue.TryDequeue(out key))
                 {
                     item = this.Dequeue(key);
                     // if a distribution finishes, remove it
-                    if (sourceQueue[item.DistributionId].All(o => o.IsCompleted))
+                    BlockingCollection<ISource>[] sources;
+
+                    if (sourceQueue.TryGetValue(key, out sources) && sources.All(o => o.IsCompleted))
                     {
                         sourceQueue.TryRemove(item.DistributionId, out _);
                     }
@@ -149,6 +156,8 @@ namespace XCBatch.Core.Queue.Concurrent
                         sourceIndexQueue.Enqueue(key);
                     }
                 }
+
+                if (this.IsEmpty || this.sourceIndexQueue.IsEmpty) Task.Delay(1);
             }
             
             return item;

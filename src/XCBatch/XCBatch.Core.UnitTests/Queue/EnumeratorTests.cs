@@ -46,10 +46,24 @@ namespace XCBatch.Core.UnitTests.Queue
         }
 
         [TestMethod()]
+        public void Enumerator_WithoutComplete_DoesNotFinish()
+        {
+            var queue = new ConcurrentMemoryQueue();
+            queue.ShouldNotFinishEnumerationWithoutComplete();
+        }
+
+        [TestMethod()]
         public void Enumerator_WithConcurrentMemoryQueueBound_FinishesInParallel()
         {
             var queue = new ConcurrentMemoryQueueBound();
             queue.ShouldFinishEnumerationInParallel();
+        }
+
+        [TestMethod()]
+        public void BoundEnumerator_WithoutComplete_DoesNotFinish()
+        {
+            var queue = new ConcurrentMemoryQueueBound();
+            queue.ShouldNotFinishEnumerationWithoutComplete();
         }
     }
 }

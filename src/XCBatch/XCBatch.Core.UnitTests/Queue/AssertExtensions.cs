@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using XCBatch.Core.Queue.Concurrent;
 using XCBatch.Core.UnitTests.Implementations;
@@ -101,6 +102,11 @@ namespace XCBatch.Core.UnitTests.Queue
 
         internal static void ShouldFinishEnumerationInParallel(this IQueueBackendSignaled queue, int sourceCount = 5, int distributions = 3)
         {
+            ShouldNotFinishEnumerationWithoutComplete(queue, sourceCount, distributions, true);
+        }
+
+        internal static void ShouldNotFinishEnumerationWithoutComplete(this IQueueBackendSignaled queue, int sourceCount = 5, int distributions = 3, bool signal = false)
+        {
             for (int i = 0; i < distributions; i++)
             {
                 for (int s = 0; s < sourceCount; s++)
@@ -111,12 +117,18 @@ namespace XCBatch.Core.UnitTests.Queue
 
             var dequeueTask = Task.Factory.StartNew(() =>
             {
+                // make sure no nulls are returned
                 foreach (var source in new XCBatch.Core.Queue.Enumerator(queue)) { Assert.NotNull(source); }
             });
 
-            queue.CompleteEnqueue();
+            if (signal) queue.CompleteEnqueue();
 
-            dequeueTask.Wait();
+            Thread.SpinWait(60000); // dequeue will finish by now
+
+            Assert.Equal(signal, queue.IsComplete);
+            Assert.Equal(signal, dequeueTask.IsCompleted);
         }
+
+        
     }
 }

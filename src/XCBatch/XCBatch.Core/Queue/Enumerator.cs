@@ -31,7 +31,7 @@ namespace XCBatch.Core.Queue
         public bool MoveNext()
         {
             // automatic
-            return !backend.IsEmpty;
+            return (backend is IQueueBackendSignaled) ? !((IQueueBackendSignaled)backend).IsComplete : !backend.IsEmpty;
         }
 
         public void Reset()

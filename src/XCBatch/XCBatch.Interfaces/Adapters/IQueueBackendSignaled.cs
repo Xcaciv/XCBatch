@@ -7,6 +7,10 @@
     public interface IQueueBackendSignaled : IQueueBackendDistributed
     {
         /// <summary>
+        /// Gets a value that indicates the queuing is finished
+        /// </summary>
+        bool IsComplete { get; }
+        /// <summary>
         /// Signals the queue is not accepting any more additions
         /// </summary>
         void CompleteEnqueue();

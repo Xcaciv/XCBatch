@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>netcoreapp3.1;netstandard2.0;net472</TargetFrameworks>
@@ -11,12 +11,12 @@
     <RepositoryUrl>https://dev.azure.com/XCACIV/_git/XCBatch</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>c# queue batch azure</PackageTags>
-    <Version>1.0.5</Version>
+    <Version>1.1.1</Version>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>xcbKey.pfx</AssemblyOriginatorKeyFile>
     <DelaySign>false</DelaySign>
-    <AssemblyVersion>1.0.4.13</AssemblyVersion>
-    <FileVersion>1.0.4.13</FileVersion>
+    <AssemblyVersion>1.1.0.11</AssemblyVersion>
+    <FileVersion>1.1.0.11</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
