@@ -32,7 +32,34 @@ namespace XCBatch.Core.UnitTests.Queue
             }
         }
 
-        internal static void ShouldDequeueDistributedRoundRobin(this IQueueBackendDistributed queue, int sourceCount = 2, int distributions = 3)
+        internal static void ShouldDequeueDistribution(this IQueueBackendDistributed queue, int sourceCount = 3, int distributions = 3)
+        {
+            for (int i = 0; i < distributions; i++)
+            {
+                for (int s = 0; s < sourceCount; s++)
+                {
+                    queue.Enqueue(new SourceOne() { SubjectId = s, DistributionId = i });
+                }
+            }
+            
+            // signal end of queuing if needed
+            if (queue is IQueueBackendSignaled queueBackendSignaled)
+            {
+                (queueBackendSignaled).CompleteEnqueue();
+            }
+
+            var dequeueCount = 0;
+            var toDequeue = distributions - 1;
+            foreach(var source in new Core.Queue.Enumerator(queue, toDequeue))
+            {
+                dequeueCount++;
+                Assert.Equal(toDequeue, source.DistributionId);
+            }
+
+            Assert.Equal(sourceCount, dequeueCount);
+        }
+
+        internal static void ShouldDequeueDistributedRoundRobin(this IQueueBackendDistributed queue, int sourceCount = 3, int distributions = 3)
         {
             for (int i = 0; i < distributions; i++)
             {
@@ -48,13 +75,17 @@ namespace XCBatch.Core.UnitTests.Queue
                 (queueBackendSignaled).CompleteEnqueue();
             }
 
+            var dequeueCount = 0;
             var distroId = -1;
             while(!queue.IsEmpty)
             {
+                dequeueCount++;
                 var source = queue.Dequeue();
                 Assert.NotEqual(distroId, source.DistributionId);
                 distroId = source.DistributionId;
             }
+
+            Assert.Equal(sourceCount*distributions, dequeueCount);
         }
 
         internal static void ShouldDequeueDistributionInOrder(this IQueueBackendDistributed queue, int sourceCount = 3, int distributions = 3)
@@ -102,10 +133,10 @@ namespace XCBatch.Core.UnitTests.Queue
 
         internal static void ShouldFinishEnumerationInParallel(this IQueueBackendSignaled queue, int sourceCount = 5, int distributions = 3)
         {
-            ShouldNotFinishEnumerationWithoutComplete(queue, sourceCount, distributions, true);
+            Should_Not_FinishEnumerationWithoutComplete(queue, sourceCount, distributions, true);
         }
 
-        internal static void ShouldNotFinishEnumerationWithoutComplete(this IQueueBackendSignaled queue, int sourceCount = 5, int distributions = 3, bool signal = false)
+        internal static void Should_Not_FinishEnumerationWithoutComplete(this IQueueBackendSignaled queue, int sourceCount = 5, int distributions = 3, bool signal = false)
         {
             for (int i = 0; i < distributions; i++)
             {
@@ -129,6 +160,32 @@ namespace XCBatch.Core.UnitTests.Queue
             Assert.Equal(signal, dequeueTask.IsCompleted);
         }
 
-        
+        internal static void ShouldNotFinishDistributionEnumerationWithoutComplete(this IQueueBackendSignaled queue, int sourceCount = 5, int distributions = 3, bool signal = false)
+        {
+            for (int i = 0; i < distributions; i++)
+            {
+                for (int s = 0; s < sourceCount; s++)
+                {
+                    queue.Enqueue(new SourceOne() { SubjectId = s, DistributionId = i });
+                }
+            }
+
+            int targetDistribution = distributions - 1;
+
+            var dequeueTask = Task.Factory.StartNew((distro) =>
+            {
+                // make sure no nulls are returned
+                foreach (var source in new XCBatch.Core.Queue.Enumerator(queue, (int)distro)) { Assert.NotNull(source); }
+            }, targetDistribution);
+
+            if (signal) queue.CompleteEnqueue();
+
+            Thread.SpinWait(60000); // dequeue will finish by now
+
+            Assert.Equal(signal, queue.IsComplete);
+            Assert.Equal(signal, dequeueTask.IsCompleted);
+        }
+
+
     }
 }

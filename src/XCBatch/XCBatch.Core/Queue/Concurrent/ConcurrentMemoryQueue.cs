@@ -230,5 +230,15 @@ namespace XCBatch.Core.Queue.Concurrent
             }
         }
 
+        public bool IsDistributionEmpty(int distributionId)
+        {
+            return IsDistributionComplete(distributionId);
+        }
+
+        public bool IsDistributionComplete(int distributionId)
+        {
+            BlockingCollection<ISource>[] sources;
+            return sourceQueue.TryGetValue(distributionId, out sources) && sources.All(o => o.IsCompleted);
+        }
     }
 }

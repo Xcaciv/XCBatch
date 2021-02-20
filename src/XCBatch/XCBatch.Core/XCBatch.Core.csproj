@@ -12,9 +12,9 @@
     <PackageTags>c# queue batch azure</PackageTags>
     <NeutralLanguage></NeutralLanguage>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.1.5</Version>
-    <AssemblyVersion>1.0.6.134</AssemblyVersion>
-    <FileVersion>1.0.6.134</FileVersion>
+    <Version>1.1.6</Version>
+    <AssemblyVersion>1.0.6.242</AssemblyVersion>
+    <FileVersion>1.0.6.242</FileVersion>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>scbcKey.pfx</AssemblyOriginatorKeyFile>
     <DelaySign>false</DelaySign>

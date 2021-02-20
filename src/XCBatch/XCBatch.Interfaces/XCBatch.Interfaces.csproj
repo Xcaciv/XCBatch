@@ -11,12 +11,12 @@
     <RepositoryUrl>https://dev.azure.com/XCACIV/_git/XCBatch</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>c# queue batch azure</PackageTags>
-    <Version>1.1.1</Version>
+    <Version>1.1.2</Version>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>xcbKey.pfx</AssemblyOriginatorKeyFile>
     <DelaySign>false</DelaySign>
-    <AssemblyVersion>1.1.0.11</AssemblyVersion>
-    <FileVersion>1.1.0.11</FileVersion>
+    <AssemblyVersion>1.1.0.15</AssemblyVersion>
+    <FileVersion>1.1.0.15</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

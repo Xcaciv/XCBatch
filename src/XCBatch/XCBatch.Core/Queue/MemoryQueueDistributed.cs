@@ -100,5 +100,10 @@ namespace XCBatch.Core
         {
             // nothing to clean up
         }
+
+        public bool IsDistributionEmpty(int distributionId)
+        {
+            return !(sourceQueue.ContainsKey(distributionId) && sourceQueue[distributionId].Count != 0);
+        }
     }
 }

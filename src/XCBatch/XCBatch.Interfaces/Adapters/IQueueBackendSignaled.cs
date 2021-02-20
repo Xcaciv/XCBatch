@@ -10,6 +10,14 @@
         /// Gets a value that indicates the queuing is finished
         /// </summary>
         bool IsComplete { get; }
+
+        /// <summary>
+        /// allows to check distribution for completeness
+        /// </summary>
+        /// <param name="distributionId"></param>
+        /// <returns></returns>
+        bool IsDistributionComplete(int distributionId);
+
         /// <summary>
         /// Signals the queue is not accepting any more additions
         /// </summary>
@@ -20,5 +28,6 @@
         /// to complete.
         /// </summary>
         void CompleteEnqueue(int DistributionId);
+
     }
 }

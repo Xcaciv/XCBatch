@@ -11,5 +11,12 @@
         /// <param name="distributionId"></param>
         /// <returns></returns>
         ISource Dequeue(int distributionId);
+        
+        /// <summary>
+        /// allows checking for empty distribution
+        /// </summary>
+        /// <param name="distributionId"></param>
+        /// <returns></returns>
+        bool IsDistributionEmpty(int distributionId);
     }
 }

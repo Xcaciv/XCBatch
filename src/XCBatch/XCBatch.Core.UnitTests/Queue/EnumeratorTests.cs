@@ -24,46 +24,67 @@ namespace XCBatch.Core.UnitTests.Queue
         }
 
         [TestMethod()]
-        public void Enumerator_WithConcurrentMemoryQueue_Finishes()
+        public void DistributedEnumerator_DistributedEnumerator_Finishes()
+        {
+            var queue = new MemoryQueueDistributed();
+            queue.ShouldDequeueDistribution();
+        }
+
+        [TestMethod()]
+        public void ConcurrentMemoryQueue_WithConcurrentMemoryQueue_Finishes()
         {
             var queue = new ConcurrentMemoryQueue();
             queue.ShouldFinishEnumeration();
         }
 
         [TestMethod()]
-        public void Enumerator_WithConcurrentMemoryQueueBound_Finishes()
+        public void ConcurrentMemoryQueue_DistributedEnumerator_Finishes()
+        {
+            var queue = new ConcurrentMemoryQueue();
+            queue.ShouldDequeueDistribution();
+        }
+
+        [TestMethod()]
+        public void ConcurrentMemoryQueue_InParallel_Finishes()
+        {
+            var queue = new ConcurrentMemoryQueue();
+            queue.ShouldFinishEnumerationInParallel();
+        }
+
+        [TestMethod()]
+        public void ConcurrentMemoryQueue_WithoutComplete_DoesNotFinish()
+        {
+            var queue = new ConcurrentMemoryQueue();
+            queue.Should_Not_FinishEnumerationWithoutComplete();
+        }
+
+        [TestMethod()]
+        public void ConcurrentMemoryQueueBound_Enumerator_Finishes()
         {
             var queue = new ConcurrentMemoryQueueBound();
             queue.ShouldFinishEnumeration();
         }
 
-
         [TestMethod()]
-        public void Enumerator_WithConcurrentMemoryQueue_FinishesInParallel()
+        public void ConcurrentMemoryQueueBound_DistributedEnumerator_Finishes()
         {
-            var queue = new ConcurrentMemoryQueue();
-            queue.ShouldFinishEnumerationInParallel();
+            var queue = new ConcurrentMemoryQueueBound();
+            queue.ShouldDequeueDistribution();
         }
 
-        [TestMethod()]
-        public void Enumerator_WithoutComplete_DoesNotFinish()
-        {
-            var queue = new ConcurrentMemoryQueue();
-            queue.ShouldNotFinishEnumerationWithoutComplete();
-        }
 
         [TestMethod()]
-        public void Enumerator_WithConcurrentMemoryQueueBound_FinishesInParallel()
+        public void ConcurrentMemoryQueueBound_ParallelEnumerator_Finishes()
         {
             var queue = new ConcurrentMemoryQueueBound();
             queue.ShouldFinishEnumerationInParallel();
         }
 
         [TestMethod()]
-        public void BoundEnumerator_WithoutComplete_DoesNotFinish()
+        public void ConcurrentMemoryQueueBound_WithoutComplete_DoesNotFinish()
         {
             var queue = new ConcurrentMemoryQueueBound();
-            queue.ShouldNotFinishEnumerationWithoutComplete();
+            queue.Should_Not_FinishEnumerationWithoutComplete();
         }
     }
 }

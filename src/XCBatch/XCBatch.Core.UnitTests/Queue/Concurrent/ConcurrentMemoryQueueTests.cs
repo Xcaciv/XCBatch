@@ -36,7 +36,15 @@ namespace XCBatch.Core.UnitTests.Queue.Concurrent
             queue.ShouldDequeueDistributionInOrder();
         }
 
+        [Fact()]
+        public void DequeueDistribution_Incomplete_ShouldBlock()
+        {
+            var queue = new ConcurrentMemoryQueue();
+
+            queue.ShouldDequeueDistributionInOrder();
+        }
+
     }
 
-    
+
 }
