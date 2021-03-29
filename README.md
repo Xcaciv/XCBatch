@@ -4,6 +4,7 @@
 
 **Who is this for?**
 
+* You want to get queueing and worry about backends later.
 * You are building a batch processing system and want it to horizontally scale.
 * You are using some queues and you are thinking about taking advantage of the resilience of managed queues in the cloud.
 * You are thinking about using queues as inter-process communication, and maybe doing some distributed workloads using queues.
@@ -197,6 +198,7 @@ It is sometimes useful to break a process into stages and hand each stage off to
 - gRPC distributed queue & client
 - Azure Storage Queue
 - Azure Message Queue
+- Event Grid
 - RabbitMQ
 - Redis
 - Amazon MQ
@@ -206,4 +208,4 @@ It is sometimes useful to break a process into stages and hand each stage off to
 
 Why not use `IProducerConsumerCollection<T>`?
 
-To keep things a bit simpler. Implementing Enqueue and Dequeue (with overloads) is more straight forward.
+To keep things a bit simpler. Implementing abstract Enqueue and Dequeue is more flexible and straight forward.
