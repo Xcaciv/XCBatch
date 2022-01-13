@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1;netstandard2.0;net472</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.1;netstandard2.0;net472;net5.0;net6.0</TargetFrameworks>
     <Authors>XCACIV Team</Authors>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>Interfaces for Batch 90 (XCBatch) a queue and batch framework.</Description>
@@ -11,9 +11,9 @@
     <RepositoryUrl>https://dev.azure.com/XCACIV/_git/XCBatch</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>c# queue batch azure</PackageTags>
-    <Version>1.1.2</Version>
+    <Version>1.1.3</Version>
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>xcbKey.pfx</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile></AssemblyOriginatorKeyFile>
     <DelaySign>false</DelaySign>
     <AssemblyVersion>1.1.0.15</AssemblyVersion>
     <FileVersion>1.1.0.15</FileVersion>

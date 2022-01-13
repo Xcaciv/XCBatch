@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1;netstandard2.0;net472</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.1;netstandard2.0;net472;net5.0;net6.0</TargetFrameworks>
     <Authors>XCACIV Team</Authors>
     <Product>Batch 90 Core</Product>
     <Description>Batch 90 (XCBatch) a queue and batch framework</Description>
@@ -12,7 +12,7 @@
     <PackageTags>c# queue batch azure</PackageTags>
     <NeutralLanguage></NeutralLanguage>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.1.6</Version>
+    <Version>1.1.7</Version>
     <AssemblyVersion>1.0.6.242</AssemblyVersion>
     <FileVersion>1.0.6.242</FileVersion>
     <SignAssembly>true</SignAssembly>

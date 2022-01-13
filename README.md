@@ -1,6 +1,6 @@
 # Batch 90
 
-## The universal batch/queue interface layer
+## The universal batch/queue interface layer with an in-process implementation
 
 **Who is this for?**
 
@@ -14,9 +14,9 @@
 
 *Batch 90* gives you generic interfaces and default implementations that ease you into using a managed queue service. It provides thread safe in-memory implementations for when you want to use a queue for coordinating your parallel jobs or threads. Run the same code on-prem, in the cloud or on a mobile device. Use an in-memory queue, an ESB or a managed queue backend including Amazon MQ and Azure Service Bus, or even a relational database backend. Even build your own backend to act however you need.
 
-# Get Started
+## Get Started
 
-## Installation
+### Installation
 
 From Visual Studio Package Manager Console:
 
@@ -28,7 +28,7 @@ From dotnet CLI:
 
 For more information visit the [nuget page](https://www.nuget.org/packages/XCBatch.Core/).
 
-### Queue some and Do some
+#### Queue some and Do some
 
 The basics are to do work in an organized manner and take advantage of one of the basic implementations.
 
@@ -46,7 +46,7 @@ The basics are to do work in an organized manner and take advantage of one of th
     // do it
     myQueue.Dispatch();
 
-### Do what and queue what
+#### Do what and queue what
 
 In the above example, you should wonder what `MyProcessor` and `MySource` are.
 
@@ -75,7 +75,7 @@ Counter to how you may be used to viewing jobs, Batch 90 asks you to answer the 
 
 The id can refer to an object in a cache, document database, relational database or it could be a key in a dictionary. The point is for the queue to add as little load or delay on the process as possible.
 
-## THREADS‼
+### THREADS‼
 
 So far you may be thanking 'That too much ritual when I could just use `System.Collections.Queue`.' If you are: bear with it, we are getting there.
 
@@ -106,7 +106,7 @@ The frontend in use here is a 'signaled' frontend. This means that a signal is g
 
 In the example we use Tasks instead of manual threads since they are more portable and predictable across running environments. The tasks are placed in the thread pool and run asynchronously to each other until the signal is given joining them back to the main thread via a call to `WaitAll()`.
 
-## Spread it out horizontally
+### Spread it out horizontally
 
 Horizontal scale is core to the cloud value proposition. Horizontal scale not only increases overall throughput but can also be used for higher fault tolerance through redundancy. If you are doing large batch processing you are probably looking to scale horizontally if you are not already doing it. Batch 90 is here to ease you transition and open up additional backend possibilities.
 
@@ -134,7 +134,7 @@ Implementation looks very similar to threaded queueing except the queue itself n
 
 The two applications must share `ISource` types and configure their queue backends to a shared communication chanel. This chanel can be a wide variety of things with a wide variety of availability and performance. A simple concept to understand would be a relational database. A slightly more complex and costly example could be an Enterprise Service Bus. It is also possible to use Batch 90 itself as this chanel by exposing it's API over the network using number of methods like REST or an RPC framework like WCF.
 
-### Optimize Distribution
+#### Optimize Distribution
 
 Once you have distributed your workload, optimization could then look at taking advantage of cache and persistance in particular processor types.  At it's most fundamental level Batch 90 facilitates this via its favorite data type: Int32. Giving your source an id for distributing jobs independent of source type allows you, the programmer, flexibility. If you or your queue backend prefers friendly names, simply associate a number to the name. Alternatively share an enum between your producers and consumers.
 
